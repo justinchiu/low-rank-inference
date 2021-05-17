@@ -57,22 +57,12 @@
   \texttt{hippo@cs.cranberry-lemon.edu} \\
   % examples of more authors
   % \And
-  % Coauthor \\
+  % Yuntian Deng \\
   % Affiliation \\
   % Address \\
   % \texttt{email} \\
   % \AND
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \And
-  % Coauthor \\
+  % Alexander M. Rush \\
   % Affiliation \\
   % Address \\
   % \texttt{email} \\
@@ -113,12 +103,14 @@ Learning flexible latent representations from data has become a
 critical component of modern semi-supervised learning. Typically
 models for tasks like natural language processing (NLP) are trained on
 large sets of unsupervised data to learn potential internal structures
-that can be transferred to new tasks \citep{devlin2018bert,radford2019language,liu2019roberta}. The dominant paradigm in this
+that can be transferred to new tasks \citep{devlin2018bert,radford2019language,liu2019roberta}.
+The dominant paradigm in this
 space is to learn a large, opaque neural network, such as a
 transformer, and have it parameterize a simple output distribution,
 typically a fixed-sized softmax categorical.
 
-Why have the neural representations in these models continued to evolve, while the probabilistic output component of the model has remained relatively
+Why have the neural representations in these models continued to evolve,
+while the probabilistic output component of the model has remained relatively
 simple? We posit that a major issue is computational complexity.  Any
 discrete model richer than a softmax begins to incur large asymptotic
 costs in training and inference. Any benefits from latent probabilistic
@@ -131,7 +123,8 @@ the surface and PCFGs in a hierarchical manner.  With enough latent
 capacity and training data, one might expect these models to learn non-trivial
 representations, while preserving the ability to compute posterior
 distributions. However, the runtime of training HMMs and CFGs scales 
-quadratically and cubically in the number of states respectively, which limits their use to prohibitively small models.
+quadratically and cubically in the number of states respectively,
+which limits their use to prohibitively small models.
 
 
 % In particular discrete
@@ -156,83 +149,53 @@ quadratically and cubically in the number of states respectively, which limits t
 % structured prediction: accuracy vs complexity tradeoff
 
 % Recent work in computationally efficient atte
-This work targets these issues with a method for \textit{embedded structured prediction} that improves on the asymptotic complexity of structured models like HMMs and CFGs
-without sacrificing empirical accuracy. We consider models in the
+This work targets these issues with a method for
+\textit{embedded structured prediction} that improves on the asymptotic complexity
+of structured models like HMMs and CFGs
+without sacrificing empirical accuracy.
+We consider models in the
 formalism of labeled directed hypergraphs which describes a broad class
-of structured inference \citep{klein2004parsing,huang2005better,zhou2006learning,javidian2020hypergraph,chiang2020factor}. We show how under specific kernel
-decomposition constraints these models allow for efficient inference. This approach builds on work in approximate belief propagation in non-parametric graphical models~\citep{song2011kernelbp}.
-
+of structured inference \citep{klein2004parsing,huang2005better,zhou2006learning,javidian2020hypergraph,chiang2020factor}.
+We show how applying a low-rank kernel
+decomposition constraint greatly increases the speed of inference.
+This approach builds on work in approximate belief propagation in non-parametric
+graphical models~\citep{song2011kernelbp}.
 
 Starting with this decomposition, we develop new models that approximate
 standard neural structured models. Our approach applies recent work in
-computationally efficient neural attention models~\citep{peng2021rfa,choromanski2020performer}. The key
-ingredient in these, seemingly unrelated, approaches is a specific
-kernel parameterization that rewrites neural attention from a large
-softmax to an embedded feature map representation. With a kernelized
+computationally efficient neural attention models~\citep{peng2021rfa,choromanski2020performer}.
+The key ingredient in these, seemingly unrelated, approaches is a specific
+low-rank kernel parameterization that rewrites neural attention from a large
+softmax to a low-dimensional embedded feature map representation.
+With a low-rank kernelized
 inference representation, we can directly extend these advances to the
 structured prediction setting.
 
 We evaluate this approach to embedded structured prediction by
-applying kernelization to a language modeling task with HMMs and PCFGs. The application of kernelization is
+applying kernelization to a language modeling task with HMMs and PCFGs.
+The application of kernelization is
 nontrivial in high-dimensional structured models, and we demonstrate
-effective techniques for overcoming several practical challenges. We find that our approach achieves
+effective techniques for overcoming several practical challenges.
+We find that our approach achieves
 very similar results compared to exact structured models, while the
-decomposition allows us to scale past the computational limits.
-Results on HMMs let us scale to more than 4000 states, while PCFGs achieve 
+decomposition allows us to greatly increase the speed of inference.
+Results on HMMs let us scale to more than 16,000 states, while PCFGs achieve 
 a significant perplexity reduction compared to past work. 
-
-
-
-
-% We find the application of
-% kernelization is nontrivial in high dimensional structured models, and
-% demonstrate an effective method for overcoming the shortcomings of
-% kernelization by using multiple kernels within a single model.
-
-
-%  asymptotic complexity of
-% a class of structured distributions that approximates neural HMMs and
-% CFGs.
-
-
-% However, there exist rare opportunities where one can reduce the complexity of inference while retaining accuracy.
-
-
-% highlight differences between attention and structured setting
-% \todo{Clarify why it is not obvious this extends immediately to structured setting. Quality of attention is not as important to accuracy (is there a mean attention in transformers paper), since the model may learn to compensate. Is this different in structured prediction?}
-
-% contributions
-% Inspired by the success of kernel parameterizations in attention-based neural networks, 
-% %We additionally identify the limitations of our kernel parameterizations in fitting high dimensional distributions
-
-
-% \textcolor{red}{End with experimental result preview.}
 
 
 \section{Background: Structured Prediction}
 
-% % General struct pred
-% The goal of structured prediction is to model structured outputs.
-% %Structured prediction tasks such as, language modeling, have recently been dominated primarily by large neural methods, which eschew explicit structure for flexibility.
-
-
-% , for example words in a sentence.
-% We also model latent structure $z$ \todo{not sure how to best introduce this so it is common to both HMM + PCFG. is a better strategy to just go into HMM, then PCFG and skip this intro?}, which may take various forms depending on the application and model.
-% Structured models explicitly take into account correlations between variables by modeling the joint distribution $p(x,z)$.
-
-
-
-
-As motivation we consider the problem of modeling a sequence of tokens $x=(x_1, \dots, x_T)$ as a
-joint distribution $p(x_1, \ldots, x_T)$. We note that the most effective empirical approach is to model with an autoregressive neural network, and to
-output the probability of each token as a categorical distribution. While accurate, this
-approach hides much of its complexity in opaque neural parameters,
+As motivation we consider the problem of modeling the joint distribution of
+a sequence of tokens $p(x)= p(x_1, \dots, x_T)$.
+We note that the most effective empirical approach is to model with an autoregressive neural network,
+and to output the probability of each token as a categorical distribution.
+While accurate, this approach hides much of its complexity in opaque neural parameters,
 which can make it difficult to analyze or compose with other models.
 
 We instead consider generative modeling based approaches that explicitly
 utilize a hidden (latent) representation structure $z$, which may take various
-forms depending on the application and model.  Structured models
-explicitly take into account correlations between variables by
+forms depending on the application and model.
+Structured models explicitly take into account correlations between variables by
 modeling the joint distribution $p(x,z)$.
 
 As we only observe $x$, we must optimize the evidence
@@ -248,19 +211,29 @@ performing this marginalization.
 
 Hypergraphs are a graphical model formalism that
 unify a class of structured distributions that admit tractable
-inference through dynamic programming \citep{klein2004parsing,huang2005better,zhou2006learning,javidian2020hypergraph,chiang2020factor}. While the formalism is similar to undirected factor graphs,
-it allows us to represent more complex distributions, notably
+inference through dynamic programming \citep{klein2004parsing,huang2005better,zhou2006learning,javidian2020hypergraph,chiang2020factor}.
+While the formalism is similar to undirected factor graphs,
+it allows us to represent more complex distributions: notably
 dependency structures with unknown topologies, such as trees.
 
-Define a labeled, directed acyclic hypergraph as a set of nodes
+We define a labeled, directed acyclic hypergraph as a set of nodes
 $v \in \cal V$ each with a collection of labels ${\cal L}_v$; a set of
 hyperedges $\cal E$; and a designated start node $S \in {\cal V}$. Each
 hyperedge $e$ consists of a head node $u$ and tuple of tail nodes,
- $v_1 \ldots v_{|e|}$. (For simplicity, we will assume at most 2 tail nodes $v_1, v_2$ throughout.) Each hyperedge $e$
-is associated with a score function $\psi_{e}(z_u, z_{1}, z_{2})$ where $z_u\in \mcL_u$, $z_{1} \in {\cal L}_{v_1}$,  and $z_{2} \in {\cal L}_{v_2}$. Finally, we assume we have a topological ordering over the edges.
+ $v_1 \ldots v_{|e|}$.
+For simplicity, we will assume at most 2 tail nodes $v_1, v_2$ throughout.
+Each hyperedge $e$
+is associated with a score function $\psi_{e}(z_u, z_{1}, z_{2})$
+where $z_u\in \mcL_u$, $z_{1} \in {\cal L}_{v_1}$,
+and $z_{2} \in {\cal L}_{v_2}$.
+Finally, we assume we have a topological ordering over the edges.
 
-A hypergraph can be used to sum up the multiplicative scores along hyperpaths. This is done through an inside-style dynamic programming or belief
-propagation algorithm. The main benefit of the graphical representation is that it clearly provides the runtime complexity based on the structure of the hypergraph. The general algorithm is as follows, with table $\alpha$ starting at 0, 
+A hypergraph can be used to sum up the multiplicative scores along hyperpaths.
+This is done through an inside-style dynamic programming or belief
+propagation algorithm.
+The main benefit of the graphical representation is that it clearly provides the
+runtime complexity based on the structure of the hypergraph.
+The general algorithm is as follows, with table $\alpha$ starting at 0, 
 \begin{algorithm}
 \begin{algorithmic} 
 \FOR {$u \leftarrow v_1, v_2$ hyperedge $e$ in topological order}
@@ -402,7 +375,11 @@ consider approximate methods for achieving these gains.
 \subsection{Kernelized Structure Prediction}
 
 The main bottleneck for inference speed is the $\psi$ functions that join together the head and the tail labels. 
-We can separate this connection by using a kernel linearization of the original scoring function.\footnote{This approach is related to kernelized belief propagation, however the underlying model settings are different~\citep{song2011kernelbp}.}
+We can separate this connection by using a kernel linearization \cite{aizerman67linearization,jakel2007linearization}
+of the original scoring function.\footnote{
+This approach is related to kernelized belief propagation,
+however the underlying model assumptions are different~\citep{song2011kernelbp}.
+}
 
 Specifically, a kernel is a symmetric function
 $K : {\R^D} \times {\R^D} \to \R^+$ for dimensionality $D$.
@@ -537,7 +514,9 @@ Given the evidence $p(x)$, the parameters of an HMM can then be optimized via gr
 
 \subsection*{Context-Free Grammars}
 
-The PCFG uses a similar mixed parameterization to the HMM. These probabilities correspond to start ($S\to A$), preterminal ($T\to x$), and standard productions ($A\to B\ C$) respectively.
+The PCFG uses a similar mixed parameterization to the HMM.
+These probabilities correspond to start ($S\to A$), preterminal ($T\to x$),
+and standard productions ($A\to B\ C$) respectively.
 \begin{equation}
 \label{eqn:pcfg}
 \begin{aligned}
@@ -682,7 +661,8 @@ fits synthetically generated categorical data.
 Figure~\ref{fig:cat-kl} (a) illustrates the relationship between the number of features $N$ and the state space size of the discrete softmax distribution. In all cases, a randomly initialized softmax model $K_\SM$ was able to achieve $< 0.05$ KL, whereas the approximate models $K_{\textrm{pos}}$ performed worse. The KL between the true and learned distributions at convergence decreases with more features, which lends the model more expressivity but increases the computational cost.
 In Figure~\ref{fig:cat-kl} (b), we compare approximate softmax models at varying temperatures. We see that $K_{\textrm{pos}}$ is able to achieve lower KL as the temperature of the true distribution increases, resulting in a higher entropy true distribution.
 
-These experiments show that the ratio between the size of the distribution and the number of features balances accuracy and efficiency. There is a consistent gain in modeling flexibility with more features, but they all lag 
+These experiments show that the ratio between the size of the distribution and the number of features balances accuracy and efficiency.
+There is a consistent gain in modeling flexibility with more features, but they all lag 
 behind softmax in this setting.
 
 % PTB LM HMM
@@ -709,13 +689,56 @@ All LHMMs all use a fixed number of features, $N = 512$.
 }
 \end{table}
 \paragraph{Hidden Markov Model}
-Table~\ref{tbl:hmm-ppl} shows the results for language modeling with HMMs on \textsc{Ptb}. The Linearized HMMs (LHMM) achieve equal performance with their softmax counterparts at a fraction of the computational cost, as the Linearized HMM takes time $O(T|\mcL|N)$ while the softmax HMM takes time $O(T|\mcL|^2)$, with $|\mcL|=1024$ and $N=512$. However, while we are able to train larger models efficiently, as expected, these models are significantly outperformed by neural autoregressive approaches. A more fair comparison is with the VL-HMM \citep{chiu2020scaling}, a large HMM model that exploits fixed sparsity patterns in the model and scales to 64K states. We believe with some of these same approaches the LHMM could scale to larger sizes as well.
 
-Table~\ref{tbl:hmm-ppl-states} compares LHMMs to standard softmax HMMs. We find that for a fixed number of features $n=512$, LHMMs are able to match the performance of softmax HMMs with the same state size, up to $|\mcL|=1024$ states.
-As we increase the number of states further, while still keeping the number of features fixed at $N=512$, the perplexity continues to improve up until $|\mcL|=4096$, where performance is the same as the LHMM with $|\mcL|=2048$.
-Further examining the relationship between the number of labels $|\mcL|$ and features $N$, Figure~\ref{fig:hmm-ppl-features} shows that for a fixed number of states, $|\mcL|=512$, performance remains the same after halving the number of features to 256, but degrades as we decrease the number of features, once $N < 256$.
+\begin{comment}
+Table~\ref{tbl:hmm-ppl} shows the results for language modeling with HMMs on \textsc{Ptb}.
+The Low-rank HMMs (LHMM) achieve equal performance with their softmax counterparts at a
+fraction of the computational cost, as the LHMM takes time $O(T|\mcL|N)$
+while the softmax HMM takes time $O(T|\mcL|^2)$, with $|\mcL|=1024$ and $N=512$.
+However, while we are able to train larger models efficiently, as expected,
+these models are significantly outperformed by neural autoregressive approaches.
+A more fair comparison is with the VL-HMM \citep{chiu2020scaling},
+a large HMM model that exploits fixed sparsity patterns in the model and scales to 64K states.
+We believe with some of these same approaches the LHMM could scale to larger sizes as well.
 
-Table~\ref{tbl:hmm-ablation} shows the results of ablations for the LHMM. Ablations are conducted by independently on a base LHMM with 256 states and features. Constraining embeddings to $l_2$ norm 1 leads to very similar performance. We find that fixing the feature map and not learning through it results in a loss in performance. Additionally, we find that the form of the feature map impacts performance as well, with $\phi_{\textrm{pos}}$ outperforming both $\phi_\ReLU$ and $\phi_{\exp}$.
+Table~\ref{tbl:hmm-ppl-states} compares LHMMs to standard softmax HMMs.
+We find that for a fixed number of features $n=512$,
+LHMMs are able to match the performance of softmax HMMs with the same state size,
+up to $|\mcL|=1024$ states.
+As we increase the number of states further,
+while still keeping the number of features fixed at $N=512$,
+the perplexity continues to improve up until $|\mcL|=4096$,
+where performance is the same as the LHMM with $|\mcL|=2048$.
+Further examining the relationship between the number of labels $|\mcL|$ and features $N$,
+Figure~\ref{fig:hmm-ppl-features} shows that for a fixed number of states,
+$|\mcL|=512$, performance remains the same after halving the number of features to 256,
+but degrades as we decrease the number of features, once $N < 256$.
+
+Table~\ref{tbl:hmm-ablation} shows the results of ablations for the LHMM.
+Ablations are conducted by independently on a base LHMM with 256 states and features.
+Constraining embeddings to $l_2$ norm 1 leads to very similar performance.
+We find that fixing the feature map and not learning through it results in a loss in performance.
+Additionally, we find that the form of the feature map impacts performance as well,
+with $\phi_{\textrm{pos}}$ outperforming both $\phi_\ReLU$ and $\phi_{\exp}$.
+\end{comment}
+
+% Scaling results: No dropout, dropout, band
+Figure~TBD shows the results for language modeling with HMMs on \textsc{PTB}.
+Low-rank HMMs (LHMM) are able to match the performance of unconstrained softmax HMMs
+at a fraction of the computational cost.
+% move this to methods?
+As the low-rank transition structure replaces the $O(\mcL^2)$ computation
+in inference with 2 $O(\mcL N)$ operations, 
+
+Table~TBD shows that HMMs do not out-perform LSTM-based models,
+as seen in previous work \citep{chiu2020scaling}.
+% Comparison to LSTM and VL-HMM
+Additionally, for language modeling on \textsc{PTB},
+LHMMs are outperformed by VL-HMMs \citep{chiu2020scaling} in both accuracy and speed.
+This is expected, as the specific block-sparse emission constraint applied in VL-HMMs
+requires very strong assumptions, and therefore gives very strong speedups as well
+as regularization.
+% Timing
 
 \begin{table}[!t]
 \centering
@@ -741,6 +764,33 @@ Softmax HMMs with state sizes $|\mcL|$ greater than 1024 are not run due to comp
 \begin{figure}[t]
 \centering
 \includegraphics[height=4.5cm]{imgs/hmm/hmm-ppl-features.png}
+\caption{
+\label{fig:hmm-ppl-features}
+Perplexities on \textsc{Ptb} for an LHMM with a varying number of features $N$ and fixed number of states $|\mcL|=512$.
+}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[height=4.5cm]{imgs/hmm/lhmm-states-features.png}
+\caption{
+\label{fig:hmm-ppl-features}
+Perplexities on \textsc{Ptb} for an LHMM with a varying number of features $N$ and fixed number of states $|\mcL|=512$.
+}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[height=4.5cm]{imgs/hmm/lhmm-states-features-dropout.png}
+\caption{
+\label{fig:hmm-ppl-features}
+Perplexities on \textsc{Ptb} for an LHMM with a varying number of features $N$ and fixed number of states $|\mcL|=512$.
+}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[height=4.5cm]{imgs/hmm/lhmm-states-features-speed.png}
 \caption{
 \label{fig:hmm-ppl-features}
 Perplexities on \textsc{Ptb} for an LHMM with a varying number of features $N$ and fixed number of states $|\mcL|=512$.
@@ -873,7 +923,7 @@ Note that the Reference section does not count towards the page limit.
 \medskip
 
 \bibliography{bib}
-\bibliographystyle{plain}
+\bibliographystyle{plainnat}
 
 {
 \small

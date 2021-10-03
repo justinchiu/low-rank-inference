@@ -966,7 +966,7 @@ The key matrix-vector product step in scalar form is given by
 \end{align*}
 which must be computed for each $z_u$.
 The first line takes $O(\mcL^{|e|+1})$ computation,
-while the second line takes $O(\mcL^{|e|}N)$ computation.
+while the last line takes $O(\mcL^{|e|}N)$ computation.
 The speedup comes rearranging the sum over $(z_1,z_2)$ and $n$,
 then pulling out the $U_e$ factor, thanks to the distributive
 propery of multiplication.

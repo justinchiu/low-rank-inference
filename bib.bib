@@ -265,14 +265,6 @@ url={https://openreview.net/forum?id=B1l6qiR5F7},
       primaryClass={cs.CL}
 }
 
-@misc{chiu2020scaling,
-      title={Scaling Hidden Markov Language Models}, 
-      author={Justin T. Chiu and Alexander M. Rush},
-      year={2020},
-      eprint={2011.04640},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
-}
 
 @misc{wang2020ain,
       title={AIN: Fast and Accurate Sequence Labeling with Approximate Inference Network}, 
@@ -633,3 +625,459 @@ numpages = {18}
   month_numeric = {12}
 }
 
+@article{rrhmm,
+  author    = {Sajid M. Siddiqi and
+               Byron Boots and
+               Geoffrey J. Gordon},
+  title     = {Reduced-Rank Hidden Markov Models},
+  journal   = {CoRR},
+  volume    = {abs/0910.0902},
+  year      = {2009},
+  url       = {http://arxiv.org/abs/0910.0902},
+  archivePrefix = {arXiv},
+  eprint    = {0910.0902},
+  timestamp = {Mon, 13 Aug 2018 16:48:36 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-0910-0902.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{rrpcfg,
+  author    = {Guillaume Rabusseau and
+               Borja Balle and
+               Shay B. Cohen},
+  title     = {Weighted Tree Automata Approximation by Singular Value Truncation},
+  journal   = {CoRR},
+  volume    = {abs/1511.01442},
+  year      = {2015},
+  url       = {http://arxiv.org/abs/1511.01442},
+  archivePrefix = {arXiv},
+  eprint    = {1511.01442},
+  timestamp = {Mon, 13 Aug 2018 16:47:58 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/RabusseauBC15.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{svm,
+author = {Boser, Bernhard E. and Guyon, Isabelle M. and Vapnik, Vladimir N.},
+title = {A Training Algorithm for Optimal Margin Classifiers},
+year = {1992},
+isbn = {089791497X},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi-org.proxy.library.cornell.edu/10.1145/130385.130401},
+doi = {10.1145/130385.130401},
+abstract = {A training algorithm that maximizes the margin between the training patterns and the decision boundary is presented. The technique is applicable to a wide variety of the classification functions, including Perceptrons, polynomials, and Radial Basis Functions. The effective number of parameters is adjusted automatically to match the complexity of the problem. The solution is expressed as a linear combination of supporting patterns. These are the subset of training patterns that are closest to the decision boundary. Bounds on the generalization performance based on the leave-one-out method and the VC-dimension are given. Experimental results on optical character recognition problems demonstrate the good generalization obtained when compared with other learning algorithms.},
+booktitle = {Proceedings of the Fifth Annual Workshop on Computational Learning Theory},
+pages = {144–152},
+numpages = {9},
+location = {Pittsburgh, Pennsylvania, USA},
+series = {COLT '92}
+}
+
+@inproceedings{polyphonic,
+author = {Boulanger-Lewandowski, Nicolas and Bengio, Yoshua and Vincent, Pascal},
+title = {Modeling Temporal Dependencies in High-Dimensional Sequences: Application to Polyphonic Music Generation and Transcription},
+year = {2012},
+isbn = {9781450312851},
+publisher = {Omnipress},
+address = {Madison, WI, USA},
+abstract = {We investigate the problem of modeling symbolic sequences of polyphonic music in a completely general piano-roll representation. We introduce a probabilistic model based on distribution estimators conditioned on a recurrent neural network that is able to discover temporal dependencies in high-dimensional sequences. Our approach outperforms many traditional models of polyphonic music on a variety of realistic datasets. We show how our musical language model can serve as a symbolic prior to improve the accuracy of polyphonic transcription.},
+booktitle = {Proceedings of the 29th International Coference on International Conference on Machine Learning},
+pages = {1881–1888},
+numpages = {8},
+location = {Edinburgh, Scotland},
+series = {ICML'12}
+}
+
+@article{implicit-rank-reg,
+  author    = {Sanjeev Arora and
+               Nadav Cohen and
+               Wei Hu and
+               Yuping Luo},
+  title     = {Implicit Regularization in Deep Matrix Factorization},
+  journal   = {CoRR},
+  volume    = {abs/1905.13655},
+  year      = {2019},
+  url       = {http://arxiv.org/abs/1905.13655},
+  archivePrefix = {arXiv},
+  eprint    = {1905.13655},
+  timestamp = {Mon, 03 Jun 2019 13:42:33 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1905-13655.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{dmc,
+author = {Siddiqi, Sajid M. and Moore, Andrew W.},
+title = {Fast Inference and Learning in Large-State-Space HMMs},
+year = {2005},
+isbn = {1595931805},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi-org.proxy.library.cornell.edu/10.1145/1102351.1102452},
+doi = {10.1145/1102351.1102452},
+abstract = {For Hidden Markov Models (HMMs) with fully connected transition models, the three fundamental problems of evaluating the likelihood of an observation sequence, estimating an optimal state sequence for the observations, and learning the model parameters, all have quadratic time complexity in the number of states. We introduce a novel class of non-sparse Markov transition matrices called Dense-Mostly-Constant (DMC) transition matrices that allow us to derive new algorithms for solving the basic HMM problems in sub-quadratic time. We describe the DMC HMM model and algorithms and attempt to convey some intuition for their usage. Empirical results for these algorithms show dramatic speedups for all three problems. In terms of accuracy, the DMC model yields strong results and outperforms the baseline algorithms even in domains known to violate the DMC assumption.},
+booktitle = {Proceedings of the 22nd International Conference on Machine Learning},
+pages = {800–807},
+numpages = {8},
+location = {Bonn, Germany},
+series = {ICML '05}
+}
+
+@inproceedings{ffthmm,
+ author = {Felzenszwalb, Pedro and Huttenlocher, Daniel and Kleinberg, Jon},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {S. Thrun and L. Saul and B. Sch\"{o}lkopf},
+ pages = {},
+ publisher = {MIT Press},
+ title = {Fast Algorithms for Large-State-Space HMMs with Applications to Web Usage Analysis},
+ url = {https://proceedings.neurips.cc/paper/2003/file/9407c826d8e3c07ad37cb2d13d1cb641-Paper.pdf},
+ volume = {16},
+ year = {2004}
+}
+
+@misc{dedieu2019learning,
+      title={Learning higher-order sequential structure with cloned HMMs}, 
+      author={Antoine Dedieu and Nishad Gothoskar and Scott Swingle and Wolfgang Lehrach and Miguel Lázaro-Gredilla and Dileep George},
+      year={2019},
+      eprint={1905.00507},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@misc{yang2021pcfgs,
+      title={PCFGs Can Do Better: Inducing Probabilistic Context-Free Grammars with Many Symbols}, 
+      author={Songlin Yang and Yanpeng Zhao and Kewei Tu},
+      year={2021},
+      eprint={2104.13727},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@inproceedings{
+kaleidoscope,
+title={Kaleidoscope: An Efficient, Learnable Representation For All Structured Linear Maps},
+author={Tri Dao and Nimit Sohoni and Albert Gu and Matthew Eichhorn and Amit Blonder and Megan Leszczynski and Atri Rudra and Christopher Ré},
+booktitle={International Conference on Learning Representations},
+year={2020},
+url={https://openreview.net/forum?id=BkgrBgSYDS}
+}
+
+@misc{rtransformer,
+      title={R-Transformer: Recurrent Neural Network Enhanced Transformer}, 
+      author={Zhiwei Wang and Yao Ma and Zitao Liu and Jiliang Tang},
+      year={2019},
+      eprint={1907.05572},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+@article{betalstm,
+  author    = {Kyungwoo Song and
+               JoonHo Jang and
+               Seungjae Shin and
+               Il{-}Chul Moon},
+  title     = {Bivariate Beta {LSTM}},
+  journal   = {CoRR},
+  volume    = {abs/1905.10521},
+  year      = {2019},
+  url       = {http://arxiv.org/abs/1905.10521},
+  archivePrefix = {arXiv},
+  eprint    = {1905.10521},
+  timestamp = {Tue, 10 Mar 2020 10:29:05 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1905-10521.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{flow,
+      title={Latent Normalizing Flows for Discrete Sequences}, 
+      author={Zachary M. Ziegler and Alexander M. Rush},
+      year={2019},
+      eprint={1901.10548},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@misc{nasmc,
+      title={Neural Adaptive Sequential Monte Carlo}, 
+      author={Shixiang Gu and Zoubin Ghahramani and Richard E. Turner},
+      year={2015},
+      eprint={1506.03338},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+@misc{tsbn,
+      title={Deep Temporal Sigmoid Belief Networks for Sequence Modeling},
+      author={Zhe Gan and Chunyuan Li and Ricardo Henao and David Carlson and Lawrence Carin},
+      year={2015},
+      eprint={1509.07087},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@misc{srnn,
+      title={Sequential Neural Models with Stochastic Layers}, 
+      author={Marco Fraccaro and Søren Kaae Sønderby and Ulrich Paquet and Ole Winther},
+      year={2016},
+      eprint={1605.07571},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@misc{gunasekar2017implicit,
+      title={Implicit Regularization in Matrix Factorization}, 
+      author={Suriya Gunasekar and Blake Woodworth and Srinadh Bhojanapalli and Behnam Neyshabur and Nathan Srebro},
+      year={2017},
+      eprint={1705.09280},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@inproceedings{razin2020rank,
+ author = {Razin, Noam and Cohen, Nadav},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {H. Larochelle and M. Ranzato and R. Hadsell and M. F. Balcan and H. Lin},
+ pages = {21174--21187},
+ publisher = {Curran Associates, Inc.},
+ title = {Implicit Regularization in Deep Learning May Not Be Explainable by Norms},
+ url = {https://proceedings.neurips.cc/paper/2020/file/f21e255f89e0f258accbe4e984eef486-Paper.pdf},
+ volume = {33},
+ year = {2020}
+}
+
+@article{scaling-laws,
+  author    = {Jared Kaplan and
+               Sam McCandlish and
+               Tom Henighan and
+               Tom B. Brown and
+               Benjamin Chess and
+               Rewon Child and
+               Scott Gray and
+               Alec Radford and
+               Jeffrey Wu and
+               Dario Amodei},
+  title     = {Scaling Laws for Neural Language Models},
+  journal   = {CoRR},
+  volume    = {abs/2001.08361},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2001.08361},
+  archivePrefix = {arXiv},
+  eprint    = {2001.08361},
+  timestamp = {Wed, 03 Jun 2020 10:55:13 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2001-08361.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{nplm,
+author = {Bengio, Yoshua and Ducharme, R\'{e}jean and Vincent, Pascal and Janvin, Christian},
+title = {A Neural Probabilistic Language Model},
+year = {2003},
+issue_date = {3/1/2003},
+publisher = {JMLR.org},
+volume = {3},
+number = {null},
+issn = {1532-4435},
+abstract = {A goal of statistical language modeling is to learn the joint probability function of sequences of words in a language. This is intrinsically difficult because of the curse of dimensionality: a word sequence on which the model will be tested is likely to be different from all the word sequences seen during training. Traditional but very successful approaches based on n-grams obtain generalization by concatenating very short overlapping sequences seen in the training set. We propose to fight the curse of dimensionality by learning a distributed representation for words which allows each training sentence to inform the model about an exponential number of semantically neighboring sentences. The model learns simultaneously (1) a distributed representation for each word along with (2) the probability function for word sequences, expressed in terms of these representations. Generalization is obtained because a sequence of words that has never been seen before gets high probability if it is made of words that are similar (in the sense of having a nearby representation) to words forming an already seen sentence. Training such large models (with millions of parameters) within a reasonable time is itself a significant challenge. We report on experiments using neural networks for the probability function, showing on two text corpora that the proposed approach significantly improves on state-of-the-art n-gram models, and that the proposed approach allows to take advantage of longer contexts.},
+journal = {J. Mach. Learn. Res.},
+month = mar,
+pages = {1137–1155},
+numpages = {19}
+}
+
+@inproceedings{
+video,
+title={Scaling Autoregressive Video Models},
+author={Dirk Weissenborn and Oscar Täckström and Jakob Uszkoreit},
+booktitle={International Conference on Learning Representations},
+year={2020},
+url={https://openreview.net/forum?id=rJgsskrFwH}
+}
+
+@article{topics,
+  title={Applications of Topic Models},
+  author={Jordan L. Boyd-Graber and Yuening Hu and David Mimno},
+  journal={Found. Trends Inf. Retr.},
+  year={2017},
+  volume={11},
+  pages={143-296}
+}
+
+@misc{levine2018reinforcement,
+      title={Reinforcement Learning and Control as Probabilistic Inference: Tutorial and Review}, 
+      author={Sergey Levine},
+      year={2018},
+      eprint={1805.00909},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+@inproceedings{zhukov2019cross,
+  title={Cross-task weakly supervised learning from instructional videos},
+  author={Zhukov, Dimitri and Alayrac, Jean-Baptiste and Cinbis, Ramazan Gokberk and Fouhey, David and Laptev, Ivan and Sivic, Josef},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={3537--3545},
+  year={2019}
+}
+@article{fried2020learning,
+  title={Learning to segment actions from observation and narration},
+  author={Fried, Daniel and Alayrac, Jean-Baptiste and Blunsom, Phil and Dyer, Chris and Clark, Stephen and Nematzadeh, Aida},
+  journal={arXiv preprint arXiv:2005.03684},
+  year={2020}
+}
+
+@book{pgm,
+author = {Koller, Daphne and Friedman, Nir},
+title = {Probabilistic Graphical Models: Principles and Techniques - Adaptive Computation and Machine Learning},
+year = {2009},
+isbn = {0262013193},
+publisher = {The MIT Press},
+abstract = {Most tasks require a person or an automated system to reasonto reach conclusions based on available information. The framework of probabilistic graphical models, presented in this book, provides a general approach for this task. The approach is model-based, allowing interpretable models to be constructed and then manipulated by reasoning algorithms. These models can also be learned automatically from data, allowing the approach to be used in cases where manually constructing a model is difficult or even impossible. Because uncertainty is an inescapable aspect of most real-world applications, the book focuses on probabilistic models, which make the uncertainty explicit and provide models that are more faithful to reality. Probabilistic Graphical Models discusses a variety of models, spanning Bayesian networks, undirected Markov networks, discrete and continuous models, and extensions to deal with dynamical systems and relational data. For each class of models, the text describes the three fundamental cornerstones: representation, inference, and learning, presenting both basic concepts and advanced techniques. Finally, the book considers the use of the proposed framework for causal reasoning and decision making under uncertainty. The main text in each chapter provides the detailed technical development of the key ideas. Most chapters also include boxes with additional material: skill boxes, which describe techniques; case study boxes, which discuss empirical cases related to the approach described in the text, including applications in computer vision, robotics, natural language understanding, and computational biology; and concept boxes, which present significant concepts drawn from the material in the chapter. Instructors (and readers) can group chapters in various combinations, from core topics to more technically advanced material, to suit their particular needs. Adaptive Computation and Machine Learning series}
+}
+
+@article{cotter2011approx,
+  author    = {Andrew Cotter and
+               Joseph Keshet and
+               Nathan Srebro},
+  title     = {Explicit Approximations of the Gaussian Kernel},
+  journal   = {CoRR},
+  volume    = {abs/1109.4603},
+  year      = {2011},
+  url       = {http://arxiv.org/abs/1109.4603},
+  archivePrefix = {arXiv},
+  eprint    = {1109.4603},
+  timestamp = {Mon, 13 Aug 2018 16:47:57 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1109-4603.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{yu2010hidden,
+  title={Hidden semi-Markov models},
+  author={Yu, Shun-Zheng},
+  journal={Artificial intelligence},
+  volume={174},
+  number={2},
+  pages={215--243},
+  year={2010},
+  publisher={Elsevier}
+}
+@inproceedings{constrainedhmm,
+ author = {Roweis, Sam},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {S. Solla and T. Leen and K. M\"{u}ller},
+ pages = {},
+ publisher = {MIT Press},
+ title = {Constrained Hidden Markov Models},
+ url = {https://proceedings.neurips.cc/paper/1999/file/84c6494d30851c63a55cdb8cb047fadd-Paper.pdf},
+ volume = {12},
+ year = {2000}
+}
+
+@article{music-trans,
+  author    = {Cheng{-}Zhi Anna Huang and
+               Ashish Vaswani and
+               Jakob Uszkoreit and
+               Noam Shazeer and
+               Curtis Hawthorne and
+               Andrew M. Dai and
+               Matthew D. Hoffman and
+               Douglas Eck},
+  title     = {An Improved Relative Self-Attention Mechanism for Transformer with
+               Application to Music Generation},
+  journal   = {CoRR},
+  volume    = {abs/1809.04281},
+  year      = {2018},
+  url       = {http://arxiv.org/abs/1809.04281},
+  archivePrefix = {arXiv},
+  eprint    = {1809.04281},
+  timestamp = {Fri, 05 Oct 2018 11:34:52 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1809-04281.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{chiu2020scaling,
+    title = "Scaling Hidden {M}arkov Language Models",
+    author = "Chiu, Justin  and
+      Rush, Alexander",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.emnlp-main.103",
+    doi = "10.18653/v1/2020.emnlp-main.103",
+    pages = "1341--1349",
+    abstract = "The hidden Markov model (HMM) is a fundamental tool for sequence modeling that cleanly separates the hidden state from the emission structure. However, this separation makes it difficult to fit HMMs to large datasets in modern NLP, and they have fallen out of use due to very poor performance compared to fully observed models. This work revisits the challenge of scaling HMMs to language modeling datasets, taking ideas from recent approaches to neural modeling. We propose methods for scaling HMMs to massive state spaces while maintaining efficient exact inference, a compact parameterization, and effective regularization. Experiments show that this approach leads to models that are much more accurate than previous HMMs and n-gram-based methods, making progress towards the performance of state-of-the-art NN models.",
+}
+
+@article{sequnet,
+  author    = {Daniel Stoller and
+               Mi Tian and
+               Sebastian Ewert and
+               Simon Dixon},
+  title     = {Seq-U-Net: {A} One-Dimensional Causal U-Net for Efficient Sequence
+               Modelling},
+  journal   = {CoRR},
+  volume    = {abs/1911.06393},
+  year      = {2019},
+  url       = {http://arxiv.org/abs/1911.06393},
+  archivePrefix = {arXiv},
+  eprint    = {1911.06393},
+  timestamp = {Sat, 23 Jan 2021 01:12:40 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1911-06393.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{storn,
+      title={Learning Stochastic Recurrent Networks}, 
+      author={Justin Bayer and Christian Osendorfer},
+      year={2015},
+      eprint={1411.7610},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@misc{dmm,
+      title={Structured Inference Networks for Nonlinear State Space Models}, 
+      author={Rahul G. Krishnan and Uri Shalit and David Sontag},
+      year={2016},
+      eprint={1609.09869},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+
+@article{adv-interp,
+  author    = {Xinyang Zhang and
+               Ningfei Wang and
+               Shouling Ji and
+               Hua Shen and
+               Ting Wang},
+  title     = {Interpretable Deep Learning under Fire},
+  journal   = {CoRR},
+  volume    = {abs/1812.00891},
+  year      = {2018},
+  url       = {http://arxiv.org/abs/1812.00891},
+  archivePrefix = {arXiv},
+  eprint    = {1812.00891},
+  timestamp = {Wed, 17 Jul 2019 17:08:56 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1812-00891.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{Zhang2021LabelFA,
+  title={Label flipping attacks against Naive Bayes on spam filtering systems},
+  author={Hongpo Zhang and Ning Cheng and Yang Zhang and Zhanbo Li},
+  journal={Applied Intelligence},
+  year={2021},
+  pages={1-12}
+}
+
+@article{adv-phmm,
+author = {Liu, Xiaolei and Zhuo, Zhongliu and Du, Xiaojiang and Zhang, Xiaosong and Zhu, Qingxin and Guizani, Mohsen},
+year = {2018},
+month = {12},
+pages = {},
+title = {Adversarial Attacks Against Profile HMM Website Fingerprinting Detection Model},
+volume = {54},
+journal = {Cognitive Systems Research},
+doi = {10.1016/j.cogsys.2018.12.005}
+}

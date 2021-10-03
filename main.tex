@@ -945,9 +945,9 @@ low-rank factors in each algorithm.
 \end{minipage}
 \end{algorithm}
 
-\section{Extension of the Low-Rank Constraints to Other Semirings}
-Enforcing low-rank constraints in the scoring matrix $\Psi_e$
-let to a speed increase for the key step in the hypergraph marginalization algorithm:
+\section{Extension of the Low-Rank Constraint to Other Semirings}
+Enforcing low-rank constraints in the scoring matrices $\Psi_e$
+leads to a speedup for the key step in the hypergraph marginalization algorithm:
 \begin{equation}
     \Psi_e\beta_v =  \left(U_e V_e^\top\right) \beta_v =  U_e\left(V_e^\top\beta_v\right),
 \end{equation}
@@ -957,7 +957,7 @@ used for marginal inference,
 the low-rank constraint does not result in speedups in the tropical semiring,
 used for MAP inference.
 To see this, we first review the low-rank speedup in scalar form.
-The key matrix-vector product step in scalar form is given by
+The key matrix-vector product step of marginal inference in scalar form is given by
 \begin{align*}
 \sum_{z_1,z_2} [\Psi_e]_{z_u,(z_1,z_2)}[\beta]_{z_1,z_2}
 &= \sum_{z_1,z_2} \sum_n [U_e]_{z_u,n}[V_e]_{(z_1,z_2),n}[\beta]_{z_1,z_2}\\
@@ -970,14 +970,16 @@ while the last line takes $O(\mcL^{|e|}N)$ computation.
 The speedup comes rearranging the sum over $(z_1,z_2)$ and $n$,
 then pulling out the $U_e$ factor, thanks to the distributive
 propery of multiplication.
-In the scalar form in the max-times semiring,
-we cannot rearrange max and sum:
+When performing MAP inference instead of marginal inference,
+we take a max over $(z_1,z_2)$ instead of a sum.
+Unfortunately, in the case of the max-times semiring used for MAP inference,
+we cannot rearrange max and sum,
+preventing low-rank models from obtaining a speedup:
 \begin{align*}
 \max_{z_1,z_2} [\Psi_e]_{z_u,(z_1,z_2)}[\beta]_{z_1,z_2}
 &= \max_{z_1,z_2} \sum_n [U_e]_{z_u,n}[V_e]_{(z_1,z_2),n}[\beta]_{z_1,z_2}\\
-&\ne \sum_n \max_{z_1,z_2} [U_e]_{z_u,n}[V_e]_{(z_1,z_2),n}[\beta]_{z_1,z_2},
+&\ne \sum_n \max_{z_1,z_2} [U_e]_{z_u,n}[V_e]_{(z_1,z_2),n}[\beta]_{z_1,z_2}.
 \end{align*}
-preventing us from rewriting MAP hypergraph inference as a low-rank matrix-vector product.
 
 \section{\label{sec:data}Data Details}
 For language modeling on \textsc{Penn Treebank} (\textsc{Ptb}) \citep{ptb}

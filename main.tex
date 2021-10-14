@@ -5,7 +5,7 @@
 % before loading neurips_2021
 
 % ready for submission
-\usepackage{neurips_2021}
+\usepackage[final]{neurips_2021}
 
 %\usepackage[nonatbib]{neurips_2021}
 %\usepackage[numbers]{natbib}
@@ -43,7 +43,7 @@
 
 %\title{Embedded Structured Prediction}
 %\title{Linearized Structured Models}
-\title{Low-Rank Constraints for Fast Inference in Discrete Structured Models}
+\title{Low-Rank Constraints for Fast Inference in Structured Models}
 
 % The \author macro works with any number of authors. There are two commands
 % used to separate the names and addresses of multiple authors: \And and \AND.
@@ -808,16 +808,12 @@ Low-rank inference allows us to obtain a reduction in the asymptotic complexity 
 a constrained model. 
 Our approach applies to a wide class of models, including HMMs, HSMMs, and PCFGs. Through our experiments on language, video, and polyphonic music modeling, we demonstrate an effective approach for overcoming the practical difficulty of applying low-rank constraints in high dimensional, structured spaces by targeting and constraining model components that bottleneck computation. Future work includes exploration of other structural constraints for speeding up matrix-vector products~\citep{kaleidoscope} performed in inference, as well as application to models where exact inference is intractable.
 
-\begin{comment}
-\section*{References}
-\citep{choromanski2020performer}
-References follow the acknowledgments. Use unnumbered first-level heading for
-the references. Any choice of citation style is acceptable as long as you are
-consistent. It is permissible to reduce the font size to \verb+small+ (9 point)
-when listing the references.
-Note that the Reference section does not count towards the page limit.
-\medskip
-\end{comment}
+\begin{ack}
+We thank Nikita Kitaev for the discussion that sparked this project.
+We thank Sam Wiseman and the anonymous reviewers for helpful feedback.
+\end{ack}
+
+
 
 \bibliography{bib}
 \bibliographystyle{plainnat}

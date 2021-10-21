@@ -139,14 +139,14 @@ We use the notation $[\Psi_e]_{z_u,(z_1, z_2)}$ to indicate the score for head l
 Finally, we assume we have a topological ordering over the edges.
 
 A hypergraph is used to aggregate marginals bottom-up, which is done through a dynamic programming (belief propagation) algorithm. 
-Algorithm~\ref{lab:hyp-matrix}(left) shows the algorithm. It works by filling in a table vector 
+Algorithm~\ref{lab:hyp-matrix}~(left) shows the algorithm. It works by filling in a table vector 
 $\alpha_v \in \R^{\mcL}$ for each node $v$ in order, and is initialized to 1 at the leaf nodes.\footnote{
 The accumulation of scores is denoted by $\stackrel{+}{\gets}$.
 Multiple hyperedges can have the same head node, whose scores must be added together.}
-It returns the sum over latent structures, i.e. $p(x)$. Counting
+It returns the sum over latent structures, $p(x)$. Counting
 loops, the worst-case runtime complexity is
 $O(|{\cal E}|\times L^{|e^*|+1})$ where $L = |{\cal L}|$ is the size of the
-label set and $|e^*|$ the max hyperedge tail size. Algorithm~\ref{lab:hyp-matrix}(right) shows the 
+label set and $|e^*|$ the max hyperedge tail size. Algorithm~\ref{lab:hyp-matrix}~(right) shows the 
 same algorithm in matrix form by introducing joined tail vectors $\beta_v\in\R^{\mcL^{|e|}}$ for each group of nodes $v$.  Letting $z_v = (z_1,z_2)$, the joined tail vector contains entries $[\beta]_{z_v} = [\alpha_{v_1}]_{z_1}[\alpha_{v_2}]_{z_2}$.
 
 \begin{algorithm}[t]
@@ -181,7 +181,7 @@ same algorithm in matrix form by introducing joined tail vectors $\beta_v\in\R^{
 \end{algorithm}
 
 To make this formalism more concrete, we show how hypergraphs can be used for inference in several structured generative models: hidden Markov models,  probabilistic context-free grammars, and hidden semi-Markov models.
-These examples are instances of the hypergraph algorithm.
+Inference in these examples are instances of the hypergraph algorithm.
 
 \textbf{Example: Hidden Markov Models (HMM)}
 HMMs are discrete latent sequence models defined by the following generative process: first, a sequence of discrete latent states $z = (z_1, \ldots,z_T)$ with state size $L$ are sampled as a Markov chain. Then each state $z_t$ independently emits an observation $x_t$, i.e. 
@@ -194,8 +194,10 @@ where $p(z_t \mid z_{t-1})$ is the transition distribution,
 
 Given a sequence of observations $x=(x_1, \ldots, x_n)$ we can compute
 $p(x) = \sum_zp(x,z)$ using a labeled directed hypergraph, with single-tailed edges, nodes corresponding to state positions, labels corresponding to states, and emissions probabilities incorporated into the scoring matrices $\Psi$.
-There are $T$ scoring matrices, $\Psi_t\in\R^{\mcL\times\mcL}$, with entries $[\Psi_{T-t}]_{z_t,z_{t+1}} = p(z_{t+1},x_t \mid z_t)$ corresponding to transitions. 
-Algorithm~\ref{fig:marg-hmm-pcfg} (left) shows the approach. This requires time $O(TL^2)$ and is identical to the backward algorithm for HMMs.\footnote{
+There are $T$ scoring matrices, $\Psi_t\in\R^{\mcL\times\mcL}$, with entries $[\Psi_t]_{z_t,z_{t+1}} = p(z_{t+1},x_t \mid z_t)$ corresponding to transitions.\footnote{
+The left-most scoring matrix has entries $[\Psi_1]_{z_1,z_{2}} = p(z_{2},x_1 \mid z_1)p(z_1\mid z_0)$.
+}
+Algorithm~\ref{fig:marg-hmm-pcfg}~(left) shows the approach. This requires time $O(TL^2)$ and is identical to the backward algorithm for HMMs.\footnote{
 In the case of HMMs, the table vectors $\alpha_t$ correspond to the backward algorithm's $\beta$ values.}
 
 \begin{algorithm}[t]

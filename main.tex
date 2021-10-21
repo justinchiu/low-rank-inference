@@ -297,9 +297,9 @@ on $\Psi_e$.
 
 We note the following elementary property of matrix-vector products.
 If the scoring matrix can be decomposed as the product
-of two rank-$N$ matrices $\Psi_e = U_e V_e\top$,
+of two rank-$N$ matrices $\Psi_e = U_e V_e^\top$,
 i.e. a low-rank decomposition,
-then the matrix-vector product can be computed in time
+then the matrix-vector products can be computed in time
 $O(|{\cal E}|\times L^{|e|}\times N)$,
 exchanging a factor of $L$ for a factor of $N$.
 This leads to the following matrix-vector product expression for each hyperedge $e$ with $u\leftarrow v$:
@@ -318,7 +318,7 @@ While the exponential kernel does not afford an exact linearization, the kernel 
 The stochastic approximation is a key component of recent work on efficient attention \citep{choromanski2020performer,peng2021rfa}.}.
 We instead restrict out attention to nonnegative feature mappings\footnote{The nonnegative feature mapping ensures that the resulting scoring matrix $\Psi$ is a valid probability distribution.} $\phi:\R^D\to\R^N_+$ \citep{choromanski2020performer}, such that
 \[[\Psi]_{z_u, (z_1, z_2)} = c_{z_u} c_v \phi(f(z_u))^\top\phi(g(z_{1}, z_{2})) = K(f(z_u), g(z_1, z_2)),  \]
-where $c_{z_u},c_v$ contain normalizing constants and clamped potentials (e.g. conditional probabilities), where we use $v = (z_1,z_2)$ for brevity.
+where $c_{z_u},c_v$ contain normalizing constants and clamped potentials (e.g. conditional probabilities), and we use $v = (z_1,z_2)$ for brevity.
 We refer to $K$ with a low-dimensional nonnegative feature mapping
 as an efficiently linearizable kernel.
 We then have
@@ -330,7 +330,7 @@ We then have
 Algorithm~\ref{alg:low-rank-update} shows the role of the low-rank
 matrix-vector product in marginalization.\footnote{
 If the normalizing constants are given by $c_{z_u}$,
-they can be computed from unnormalized $\tilde{U}_e,\tilde{V}_e$ as follows: $c_{z_u} = [\tilde{U}_e\tilde{V}_e^\top\mathbf{1}]_{z_u}$ in time $O(L^{|e|}N)$, and similarly for $c_{z_v}$.
+they can be computed from unnormalized $\tilde{U}_e,\tilde{V}_e$ as follows: $c_{z_u} = [\tilde{U}_e\tilde{V}_e^\top\mathbf{1}]_{z_u}$ in time $O(L^{|e|}N + LN)$, and similarly for $c_{z_v}$.
 }
 In practice, low-rank constraints can result in significant speedups. For instance, HMMs and HSMMs go from scaling quadratically
 in the number of hidden states to linearly (with a new factor of the

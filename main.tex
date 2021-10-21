@@ -446,7 +446,7 @@ For the full hyperparameter and optimization details, see Appendix~\ref{sec:opt}
 The language modeling experiments are evaluated using perplexity. Baselines are neurally parameterized HMM
 with a standard softmax transition.  We also compare to VL-HMM, which makes a strong structural sparsity assumption on the emission distribution~\citep{chiu2020scaling}. We include for reference a state-of-the-art language model, the AWD-LSTM~\citep{merity2017awdlstm}. For polyphonic music modeling, we compare our LHMM against RNN-NADE~\citep{polyphonic} which models the full joint distribution of notes as well as temporal dependencies; as well as autoregressive neural models such as the R-Transformer~\citep{rtransformer} (as reported by \citet{betalstm}) and an LSTM ~(as reported by \citet{flow}); models with latent continuous dynamics such as the LV-RNN \citep{nasmc} and SRNN \citep{srnn}; and finally comparable models with latent discrete dynamics, the TSBN \citep{tsbn} and the baseline HMM.
 %As the preprocessing of \textsc{Ptb} for the PCFG language modeling differs from that of \citet{mikolov-2011}, perplexities reported on the two datasets are incomparable. 
-We evaluate perplexities of our low-rank PCFG (LPCFG) against a softmax PCFG (PCFG) \citep{kim2019cpcfg}. For video modeling, we evaluate the negative log likelihoods on the test set and compare low-rank HSMMs to vanilla HSMMs.
+We evaluate perplexities of our low-rank PCFG (LPCFG) against a softmax PCFG (PCFG) \citep{kim2019cpcfg}. For video modeling, we evaluate the negative log likelihoods on the test set and compare low-rank HSMMs to softmax HSMMs.
 
 \begin{comment}
 \begin{figure*}

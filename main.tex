@@ -907,6 +907,8 @@ In the case of discrete emissions, however, the emission distribution for a sing
 We provide the low-rank hypergraph marginalization algorithms for HMMs and PCFGs in
 Alg.~\ref{alg:lr-marg-hmm-pcfg},
 with loops over labels $z$ (and products of labels) and feature dimensions $n$ left implicit for brevity.
+We also assume that the label sets for PCFG are uniform for brevity -- in practice,
+this can easily be relaxed (this was not assumed in Alg.~\ref{alg:marg-hmm-pcfg}).
 We show how the normalizing constants are explicitly computed using the unnormalized
 low-rank factors in each algorithm.
 

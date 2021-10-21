@@ -195,7 +195,7 @@ where $p(z_t \mid z_{t-1})$ is the transition distribution,
 Given a sequence of observations $x=(x_1, \ldots, x_n)$ we can compute
 $p(x) = \sum_zp(x,z)$ using a labeled directed hypergraph, with single-tailed edges, nodes corresponding to state positions, labels corresponding to states, and emissions probabilities incorporated into the scoring matrices $\Psi$.
 There are $T$ scoring matrices, $\Psi_t\in\R^{\mcL\times\mcL}$, with entries $[\Psi_t]_{z_t,z_{t+1}} = p(z_{t+1},x_t \mid z_t)$ corresponding to transitions.\footnote{
-The left-most scoring matrix has entries $[\Psi_1]_{z_1,z_{2}} = p(z_{2},x_1 \mid z_1)p(z_1\mid z_0)$.
+The left-most scoring matrix for the HMM has entries $[\Psi_1]_{z_1,z_{2}} = p(z_{2},x_1 \mid z_1)p(z_1\mid z_0)$.
 }
 Algorithm~\ref{fig:marg-hmm-pcfg}~(left) shows the approach. This requires time $O(TL^2)$ and is identical to the backward algorithm for HMMs.\footnote{
 In the case of HMMs, the table vectors $\alpha_t$ correspond to the backward algorithm's $\beta$ values.}
@@ -818,6 +818,7 @@ We thank Sam Wiseman and the anonymous reviewers for helpful feedback.
 \bibliographystyle{plainnat}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
 \section*{Checklist}
 
 \begin{enumerate}
@@ -879,7 +880,7 @@ We thank Sam Wiseman and the anonymous reviewers for helpful feedback.
 \end{enumerate}
 
 \end{enumerate}
-
+\end{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 
@@ -894,7 +895,8 @@ In the case of discrete emissions, however, the emission distribution for a sing
 
 \section{\label{sec:low-rank-marg}Low-Rank Hypergraph Marginalization for HMMs and PCFGs}
 We provide the low-rank hypergraph marginalization algorithms for HMMs and PCFGs in
-Alg.~\ref{alg:lr-marg-hmm-pcfg}.
+Alg.~\ref{alg:lr-marg-hmm-pcfg},
+with loops over labels $z$ (and products of labels) and feature dimensions $n$ left implicit for brevity.
 We show how the normalizing constants are explicitly computed using the unnormalized
 low-rank factors in each algorithm.
 
@@ -909,9 +911,7 @@ low-rank factors in each algorithm.
 \STATE $[\tilde{U}]_{z,n} = [\phi(f(z))]_n$
 \STATE $[c]_z = [\tilde{U}\tilde{V}^\top\mathbf{1}_L]_z$
 \FOR {$t \leftarrow (t+1)$ in right-to-left order}
-\FOR {$z_{t+1} \in \mcL$}
 \STATE $[\beta_{t+1}]_{z_{t+1}} = [\alpha_{t+1}]_{z_{t+1}}$
-\ENDFOR
 \STATE $[V_t]_{z_{t+1},n} = [\tilde{V}]_{z_{t+1},n}$
 \STATE $[U_t]_{z_t,n} = p(x_t \mid z_t)[c]_{z_{t}}[\tilde{U}]_{z_t,n}$
 \STATE $\alpha_t \stackrel{+}{\gets} U_t(V_t^\top\beta_{t+1})$
@@ -928,9 +928,7 @@ low-rank factors in each algorithm.
 \STATE $[\tilde{U}]_{z_u,n} = [\phi(f(z_u))]_n$
 \STATE $[c]_{z_u} = [UV^\top\mathbf{1}]_{z_u}$
 \FOR {$(i,k) \leftarrow (i,j), (j,k)$ in span-size order}
-\FOR {$z_1,z_2 \in \mcL_{i,j}\times\mcL_{j,k}$}
 \STATE $[\beta_{i,j,k}]_{(z_1,z_2)} = [\alpha_{i,j}]_{z_1}[\alpha_{j,k}]_{z_2}$
-\ENDFOR
 \STATE $[V_{i,j,k}]_{z_1,z_2,n} = [\tilde{V}]_{z_1,z_2,n}$
 \STATE $[U_{i,j,k}]_{z_u,n} = [c]_{z_u}[\tilde{U}]_{z_u,n}$
 \STATE $\alpha_{i,k} \stackrel{+}{\gets} U_{i,j,k}(V_{i,j,k}^\top\beta_{i,j,k})$

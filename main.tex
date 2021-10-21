@@ -628,11 +628,21 @@ For syntactic language modeling on \textsc{Ptb}, our low-rank PCFG (LPCFG) achie
 costly. Our approach achieves comparable results with $N=8$ features. As we scale up the number of nonterminals to $|\mcN| = 100$, LPCFG stays competitive with a lower computational complexity (since $N < |\mcN|$). These experiments also demonstrate the importance of scale in syntactic language models with more than 50 point gain in perplexity over a strong starting model.
 
 \textbf{CFG Speed}
-Once the model is large enough, i.e. $|\mathcal{N}|\ge 60$ nonterminals and $|\mathcal{P}|\ge 120$ preterminals, the LPCFG is faster than PCFG, as shown in Tbl.~\ref{tbl:cky} (left). Note that the LPCFG is faster than the CFG even when the number of features $N>\frac{|\mathcal{N}|}{2}$, in contrast to the HMM case where a speedup can only be obtained when $N < L/2$. This is due to the scoring matrix being rectangular. We are replacing the multiplication of a matrix of size $(T^2,|\mathcal{N}|^2)$ with a matrix of size $(|\mathcal{N}|^2, |\mathcal{N}|)$ (complexity $T^2|\mathcal{N}|^3$) by two separate (smaller) matrix multiplications:
-
-1. the multiplication of a matrix of size $(T^2,|\mathcal{N}|^2)$ with a matrix of size $(|\mathcal{N}|^2, N)$ (complexity $T^2|\mathcal{N}|^2N$);
-2. the multiplication of a matrix of size $(T^2,N)$ with a matrix of size $(N, |\mathcal{N}|)$ (complexity $T^2N|\mathcal{N}|$).
-The first step dominates the complexity of the second step as $|\mathcal{N}|^2>>|\mathcal{N}|$, unlike the HMM case where these two steps have the same complexity due to having a square scoring matrix.
+Once the model is large enough, i.e. $|\mathcal{N}|\ge 60$ nonterminals and
+$|\mathcal{P}|\ge 120$ preterminals, the LPCFG is faster than PCFG,
+as shown in Tbl.~\ref{tbl:cky} (left).
+Note that the LPCFG is faster than the CFG even when the number of features
+$N>\frac{|\mathcal{N}|}{2}$, in contrast to the HMM case where a speedup can only
+be obtained when $N < L/2$.
+This is due to the scoring matrix being rectangular.
+We replace the multiplication of a matrix of size $(T^2,|\mathcal{N}|^2)$
+with a matrix of size $(|\mathcal{N}|^2, |\mathcal{N}|)$
+(complexity $T^2|\mathcal{N}|^3$) by two separate (smaller) matrix multiplications:
+1) the multiplication of a matrix of size $(T^2,|\mathcal{N}|^2)$
+with a matrix of size $(|\mathcal{N}|^2, N)$ (complexity $T^2|\mathcal{N}|^2N$),
+and 2) the multiplication of a matrix of size $(T^2,N)$ with a matrix of size
+$(N, |\mathcal{N}|)$ (complexity $T^2N|\mathcal{N}|$).
+The first step dominates the complexity of the second step as $|\mathcal{N}|^2>>|\mathcal{N}|$.
 
 % PCFG ablation studies moved to appendix
 \textbf{Hidden Semi-Markov Models for Video Modeling} Table~\ref{tbl:cky} (right) shows the results of video modeling using HSMMs. In addition to using a different hypergraph, these experiments use a continuous Gaussian emission model. By removing the state constraints from tasks, our HSMM baselines get better video-level NLLs than that from \citet{fried2020learning} at the cost of more memory consumption. Due to GPU memory constraints, we can only train HSMMs up to $2^8$ states, but by using our low-rank parameterization, we can scale to up to $2^{10}$ states which yields an improved NLL. Absolute results could likely be improved with more states and by an improved emission parameterization for all models.

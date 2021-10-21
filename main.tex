@@ -545,10 +545,13 @@ The LHMM has a state-to-rank ratio $8:1$.
 % Comparison to LSTM and VL-HMM
 %Additionally,
 
-All our HMMs are outperformed by neural models, and also by VL-HMMs \citep{chiu2020scaling} which offer similar modeling advantages, shown in Tbl.~\ref{tbl:hmm}~(left).
+HMMs are outperformed by neural models,
+and also by VL-HMMs \citep{chiu2020scaling} which offer similar modeling advantages to HMMs,
+as shown in Tbl.~\ref{tbl:hmm}~(left).
 This indicates that some aspects of performance are not strictly tied to scale. 
 We posit this is due to the problem-specific block-sparse emission constraint in VL-HMMs. While 
-very effective for language modeling, the VL-HMM relies on a hard clustering of states for emission. 
+very effective for language modeling,
+the VL-HMM relies on a hard clustering of states for constraining emissions. 
 This is difficult to apply to problems with richer emission models (as in music and video modeling).
 
 

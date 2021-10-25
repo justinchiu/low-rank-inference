@@ -625,7 +625,7 @@ We perform each ablation independently.
 
 % PTB PARSING PCFG
 \textbf{Context-Free Grammars}
-For syntactic language modeling on \textsc{Ptb}, our low-rank PCFG (LPCFG) achieves similar performance to PCFGs, as shown in Table~\ref{tbl:cky} (left), with an improvement in computational complexity. The PCFG models have a complexity cubic in the number of nonterminals, so even models with $|\mcN|=30$ nonterminals are relatively
+For syntactic language modeling on \textsc{Ptb}, our low-rank PCFG (LPCFG) achieves similar performance to PCFGs, as shown in Table~\ref{tbl:cky} (left), with an improvement in computational complexity. The complexity of inference in PCFGs models is cubic in the number of nonterminals, so even models with $|\mcN|=30$ nonterminals are relatively
 costly. Our approach achieves comparable results with $N=8$ features. As we scale up the number of nonterminals to $|\mcN| = 100$, LPCFG stays competitive with a lower computational complexity (since $N < |\mcN|$). These experiments also demonstrate the importance of scale in syntactic language models with more than 50 point gain in perplexity over a strong starting model.
 
 \textbf{CFG Speed}
@@ -637,11 +637,12 @@ $N>\frac{|\mathcal{N}|}{2}$, in contrast to the HMM case where a speedup can onl
 be obtained when $N < L/2$.
 This is due to the scoring matrix being rectangular:
 Recall the low-rank matrix product
-$\Psi\beta = U(V^\top\beta),$, where the left-hand side takes time $O(L^{|e|+1})$
-and the right-hand side takes $O(L^{|e|}R + LR)$.
-For PCFGs, we have $|e| = 2$, resulting in the term $V^\top\beta$ dominating the runtime.
+$\Psi\beta = U(V^\top\beta)$, where,
+when specialized to PCFGs, the left-hand side takes time $O(L^{3})$
+and the right-hand side takes $O(L^{2}N + LN)$.
+For PCFGs, the term $V^\top\beta$ dominates the runtime.
 This contrasts with HMMs, where both $V^\top\beta$ and the subsequent multiplication
-by $U$ take the same amount of time.
+by $U$ take the same amount of time, $O(LN)$.
 
 % PCFG ablation studies moved to appendix
 \textbf{Hidden Semi-Markov Models for Video Modeling} Table~\ref{tbl:cky} (right) shows the results of video modeling using HSMMs. In addition to using a different hypergraph, these experiments use a continuous Gaussian emission model. By removing the state constraints from tasks, our HSMM baselines get better video-level NLLs than that from \citet{fried2020learning} at the cost of more memory consumption. Due to GPU memory constraints, we can only train HSMMs up to $2^8$ states, but by using our low-rank parameterization, we can scale to up to $2^{10}$ states which yields an improved NLL. Absolute results could likely be improved with more states and by an improved emission parameterization for all models.
@@ -998,7 +999,7 @@ Alg.~\ref{alg:lr-marg-hmm-pcfg},
 with loops over labels $z$ (and products of labels) and feature dimensions $n$ left implicit for brevity.
 We also assume that the label sets for PCFG are uniform for brevity -- in practice,
 this can easily be relaxed (this was not assumed in Alg.~\ref{fig:marg-hmm-pcfg}).
-We show how the normalizing constants are explicitly computed using the unnormalized
+We show how the normalizing constants $c$ are explicitly computed using the unnormalized
 low-rank factors in each algorithm.
 
 \begin{algorithm}[H]
@@ -1010,7 +1011,7 @@ low-rank factors in each algorithm.
 \STATE {[\textit{HMM - Backward}]}
 \STATE $[\tilde{V}]_{z,n} = [\phi(g(z))]_n$
 \STATE $[\tilde{U}]_{z,n} = [\phi(f(z))]_n$
-\STATE $[c]_z = [\tilde{U}\tilde{V}^\top\mathbf{1}_L]_z$
+\STATE $[c]_z = [\tilde{U}\tilde{V}^\top\mathbf{1}]_z$
 \FOR {$t \leftarrow (t+1)$ in right-to-left order}
 \STATE $[\beta_{t+1}]_{z_{t+1}} = [\alpha_{t+1}]_{z_{t+1}}$
 \STATE $[V_t]_{z_{t+1},n} = [\tilde{V}]_{z_{t+1},n}$

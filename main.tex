@@ -483,17 +483,21 @@ and the number of features is varied.}
 Validation perplexities on \textsc{Ptb} versus model scale, as well as speed in seconds per batch.
 }
 \end{figure}
-Our main experimental result is that the low-rank models produce similar results as our baselines.
+Our main experimental result is that the low-rank models achieve similar accuracy,
+as measured by perplexity, as our baselines.
 Fig.~\ref{fig:hmm-ppl-features-dropout} shows that perplexity improves as we increase the scale of the HMM, and
 that the performance of our LHMM also improves at the same rate.
-At small sizes, the low-rank constraints slightly hinder performance; however
+At small sizes, the low-rank constraints slightly hinder accuracy; however
 once the size is large enough, i.e. larger than $2^{12}$, LHMMs with 8:1 state-to-rank ratios perform comparably. \footnote{
 %One explanation is that while the rank constraint results in underfitting at smaller state sizes, at larger state sizes the transition matrix of the softmax HMMs is already lower rank due to implicit rank regularization \citep{gunasekar2017implicit,implicit-rank-reg,razin2020rank}, resulting in no loss of performance with a rank constraint in the corresponding LHMM.
 See Appendix~\ref{sec:rank} for an analysis of the ranks of HMMs/LHMMs.}
 
 Fig.~\ref{fig:hmm-ppl-features-dropout} also contains speed comparisons between HMMs and LHMMs.
-A state-to-rank ratio of 8:1 matches the performance of softmax HMMs at larger state sizes and also gives an empirical speedup of more than 3x at $L = 2^{14}$.
-As expected, we only see a speedup when the state-to-rank ratio exceeds 2:1, as we replaced the $O(L^2)$ operation with two $O(LN)$ ones. This implies that the low-rank constraint is most effective with scale, where we observe large computational gains at no cost in perplexity.
+A state-to-rank ratio of 8:1 matches the accuracy of softmax HMMs at larger state sizes and also gives an empirical speedup of more than 3x at $L = 2^{14}$.
+As expected, we only see a speedup when the state-to-rank ratio exceeds 2:1,
+as we replaced the $O(L^2)$ operation with two $O(LN)$ ones.
+This implies that the low-rank constraint is most effective with scale,
+where we observe large computational gains at no cost in accuracy.
 
 
 

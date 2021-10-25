@@ -649,7 +649,18 @@ This contrasts with HMMs, where both $V^\top\beta$ and the subsequent multiplica
 by $U$ take the same amount of time, $O(LN)$.
 
 % PCFG ablation studies moved to appendix
-\textbf{Hidden Semi-Markov Models for Video Modeling} Table~\ref{tbl:cky} (right) shows the results of video modeling using HSMMs. In addition to using a different hypergraph, these experiments use a continuous Gaussian emission model. By removing the state constraints from tasks, our HSMM baselines get better video-level NLLs than that from \citet{fried2020learning} at the cost of more memory consumption. Due to GPU memory constraints, we can only train HSMMs up to $2^8$ states, but by using our low-rank parameterization, we can scale to up to $2^{10}$ states which yields an improved NLL. Absolute results could likely be improved with more states and by an improved emission parameterization for all models.
+\textbf{Hidden Semi-Markov Models for Video Modeling} Table~\ref{tbl:cky} (right)
+shows the results of video modeling using HSMMs.
+In addition to using a different hypergraph for inference,
+these experiments use a continuous Gaussian emission model.
+By removing the state constraints from tasks,
+our HSMM baselines get better video-level NLLs than that from \citet{fried2020learning}
+at the cost of more memory consumption.
+Due to GPU memory constraints, we can only train HSMMs up to $2^8$ states.
+However, the low-rank parameterization allows models to scale to $2^{10}$ states,
+yielding an improvement in NLL.
+Absolute results could likely be improved with more states and by an
+improved emission parameterization for all models.
 
 \textbf{Improving Rank Assumptions}
 %(weakness of low rank HMM)

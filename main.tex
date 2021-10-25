@@ -366,7 +366,7 @@ For other computations, we utilize a standard softmax kernel $K_\SM$ and do not 
 We refer to this as a mixed parameterization.
 
 \textbf{Hidden Markov Models}
-For Low-rank HMMs (LHMMs) we use the following mixed kernel parameterization, which specifically targets the state-state transition bottleneck:
+Low-rank HMMs (LHMMs) use the following mixed kernel parameterization, which specifically targets the state-state transition bottleneck:
 \begin{equation}
 \begin{aligned}
 p(z_1 \mid z_0) &\propto K(\bu_{z_0}, \bv_{z_1}),&
@@ -381,7 +381,8 @@ The embeddings come from neural network parameterizations detailed in Appendix~\
 
 This allows inference to be run in time $O(TLN)$, where $T$ is the length of a sequence, $L$ the size of the label space, and $N$ the feature dimension.
 
-\textbf{Hidden Semi-Markov Models} The low-rank HSMM (LHSMM) uses a similar kernel parameterization:
+\textbf{Hidden Semi-Markov Models}
+The low-rank HSMM (LHSMM) uses a similar kernel parameterization:
 \begin{equation}
 \label{eqn:hsmm}
 \begin{aligned}
@@ -634,15 +635,13 @@ as shown in Tbl.~\ref{tbl:cky} (left).
 Note that the LPCFG is faster than the CFG even when the number of features
 $N>\frac{|\mathcal{N}|}{2}$, in contrast to the HMM case where a speedup can only
 be obtained when $N < L/2$.
-This is due to the scoring matrix being rectangular.
-We replace the multiplication of a matrix of size $(T^2,|\mathcal{N}|^2)$
-with a matrix of size $(|\mathcal{N}|^2, |\mathcal{N}|)$
-(complexity $T^2|\mathcal{N}|^3$) by two separate (smaller) matrix multiplications:
-1) the multiplication of a matrix of size $(T^2,|\mathcal{N}|^2)$
-with a matrix of size $(|\mathcal{N}|^2, N)$ (complexity $T^2|\mathcal{N}|^2N$),
-and 2) the multiplication of a matrix of size $(T^2,N)$ with a matrix of size
-$(N, |\mathcal{N}|)$ (complexity $T^2N|\mathcal{N}|$).
-The first step dominates the complexity of the second step as $|\mathcal{N}|^2>>|\mathcal{N}|$.
+This is due to the scoring matrix being rectangular:
+Recall the low-rank matrix product
+$\Psi\beta = U(V^\top\beta),$, where the left-hand side takes time $O(L^{|e|+1})$
+and the right-hand side takes $O(L^{|e|}R + LR)$.
+For PCFGs, we have $|e| = 2$, resulting in the term $V^\top\beta$ dominating the runtime.
+This contrasts with HMMs, where both $V^\top\beta$ and the subsequent multiplication
+by $U$ take the same amount of time.
 
 % PCFG ablation studies moved to appendix
 \textbf{Hidden Semi-Markov Models for Video Modeling} Table~\ref{tbl:cky} (right) shows the results of video modeling using HSMMs. In addition to using a different hypergraph, these experiments use a continuous Gaussian emission model. By removing the state constraints from tasks, our HSMM baselines get better video-level NLLs than that from \citet{fried2020learning} at the cost of more memory consumption. Due to GPU memory constraints, we can only train HSMMs up to $2^8$ states, but by using our low-rank parameterization, we can scale to up to $2^{10}$ states which yields an improved NLL. Absolute results could likely be improved with more states and by an improved emission parameterization for all models.
@@ -1002,7 +1001,7 @@ this can easily be relaxed (this was not assumed in Alg.~\ref{fig:marg-hmm-pcfg}
 We show how the normalizing constants are explicitly computed using the unnormalized
 low-rank factors in each algorithm.
 
-\begin{algorithm}[t]
+\begin{algorithm}[H]
 \caption{Low-rank hypergraph marginalization for HMMs and PCFGs}
 \label{alg:lr-marg-hmm-pcfg}
 \begin{minipage}[t]{0.45\textwidth}

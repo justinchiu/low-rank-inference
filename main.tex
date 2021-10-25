@@ -1410,7 +1410,7 @@ Speed is measured in seconds per batch, and accuracy by perplexity.
 Lower is better for both.
 
 For HMMs, we range over the number of labels $L\in\set{2^{10},2^{11},2^{12},2^{13},2^{14}}$.
-For softmax HMMs, more accurate models are slower, as shown in Figure \ref{fig:hmm-frontier}.
+For softmax HMMs, more accurate models are slower, as shown in Figure \ref{fig:frontier} (left).
 However, we find that for any given accuracy for a softmax model,
 there exists a similarly accurate LHMM that outspeeds it.
 While we saw earlier in Figure \ref{fig:hmm-ppl-features-dropout}
@@ -1420,7 +1420,7 @@ lower rank achieves similar accuracy at better speed compared to a small HMM.
 
 For PCFGs, we range over $L\in\set{90,180,300}$.
 We find a similar trend compared to HMMs: accuracy results in slower models,
-as shown in Figure \ref{fig:pcfg-frontier}.
+as shown in Figure \ref{fig:frontier} (right).
 However, the LPCFG does not dominate the frontier as it did with HMMs.
 We hypothesize that this is because of the small number of labels in the model.
 In the case of HMMs, smaller softmax HMMs were more accurate than the faster low-rank versions,
@@ -1428,6 +1428,18 @@ but larger LHMMs with low rank were able to achieve similar perplexity at faster
 This may be realized by exploring LPCFGs with more state sizes,
 or simply by scaling further.
 
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{imgs/hmm/hmm-pcfg-speed-accuracy.png}
+\caption{
+\label{fig:frontier}
+The speed, in seconds per batch, versus accuracy, in perplexity,
+for HMMs (left), PCFGs (right), and low-rank versions over a range of model sizes.
+As lower is better for both measures of speed and accuracy, the frontier is the bottom left.
+}
+\end{figure}
+
+\begin{comment}
 \begin{figure}[H]
 \centering
 \includegraphics[height=6cm]{imgs/hmm/lhmm-speed-accuracy.png}
@@ -1449,6 +1461,7 @@ The speed versus accuracy for PCFGs and LPCFGs over a range of model sizes
 As lower is better for both measures of speed and accuracy, the frontier is the bottom left.
 }
 \end{figure}
+\end{comment}
 
 \section{Potential Negative Impact}
 \label{sec:impact}

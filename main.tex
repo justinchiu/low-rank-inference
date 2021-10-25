@@ -731,40 +731,46 @@ LHSMM & $2^{10}$ & $2^4$ & $1.423e5$ \\ % 142,291.8286
 \centering
 \begin{tabular} {lllrrrr}
 \toprule
-$|\mathcal{N}|$ & $|\mathcal{P}|$ & Model & $N$ &  PPL & Batch/s\\
+$|\mathcal{N}|$ & $|\mathcal{P}|$ & Model & $N$ &  PPL & Seconds\\ %Batch/s\\
 \midrule
-30  & 60    & PCFG & - & 252.60 & 4.37\\
-    &       & LPCFG & 8 &  247.02    & 3.75\\
-    &       & LPCFG & 16 & 250.59    & 3.74\\
+30  & 60    & PCFG & - & 252.60 &  0.23\\  %4.37\\
+    &       & LPCFG & 8 &  247.02    & 0.27\\ %3.75\\
+    &       & LPCFG & 16 & 250.59    & 0.27\\ %3.74\\
 \midrule
-60  & 120   & PCFG & - & 234.01 & 2.99\\
-    &       & LPCFG & 16& 217.24 & 3.55\\
-    &       & LPCFG & 32& 213.81 & 3.35\\
+60  & 120   & PCFG & - & 234.01 &  0.33\\ %2.99\\
+    &       & LPCFG & 16& 217.24 & 0.28\\ %3.55\\
+    &       & LPCFG & 32& 213.81 & 0.30\\ %3.35\\
 \midrule
-100 & 200   & PCFG & - &  191.08   & 0.98\\
-    &       & LPCFG & 32& 203.47 & 1.56\\
-    &       & LPCFG & 64& 194.25 & 1.24\\
+100 & 200   & PCFG & - &  191.08   & 1.02\\ %0.98\\
+    &       & LPCFG & 32& 203.47 & 0.64\\ %1.56\\
+    &       & LPCFG & 64& 194.25 & 0.81\\ %1.24\\
 \bottomrule
 \end{tabular}
 \vspace{0em}
 \hfill
 \begin{tabular} {lllrrrr}
 \toprule
-Model & $L$ & $N$ & NLL & Batch/s \\
+Model & $L$ & $N$ & NLL & Seconds \\ %Batch/s \\
 \midrule
-HSMM & $2^6$ & - & $1.428e5$ & 1.28 \\
-HSMM & $2^7$ & - & $1.427e5$  & 0.45\\
-HSMM & $2^8$ & - & $1.426e5$ & 0.13 \\
+HSMM & $2^6$ & - & $1.428e5$ & 0.78\\ %1.28 \\
+HSMM & $2^7$ & - & $1.427e5$  & 2.22\\ %0.45\\
+HSMM & $2^8$ & - & $1.426e5$ & 7.69\\ %0.13 \\
 \midrule
-LHSMM & $2^7$ & $2^7$ & $1.427e5$ & 0.24 \\
-LHSMM & $2^8$ & $2^6$ & $1.426e5$ & 0.20 \\
-LHSMM & $2^9$ & $2^5$ & $1.424e5$ & 0.18 \\
-LHSMM & $2^{10}$ & $2^4$ & $1.423e5$ & 0.10 \\
+LHSMM & $2^7$ & $2^7$ & $1.427e5$ & 4.17\\ %0.24 \\
+LHSMM & $2^8$ & $2^6$ & $1.426e5$ & 5.00\\ %0.20 \\
+LHSMM & $2^9$ & $2^5$ & $1.424e5$ & 5.56\\ %0.18 \\
+LHSMM & $2^{10}$ & $2^4$ & $1.423e5$ & 10.0\\ %0.10 \\
 \bottomrule
 \end{tabular}
 \vspace{.5em}
 \caption{\label{tbl:cky}
-(Left): Test perplexities and speeds for PCFG models on \textsc{Ptb}. The complexity of PCFG is $O(T^3|\mcN|^3)$, whereas the complexity of LPCFG is $O(T^3 |\mcN|^2N)$. Speeds are given in batches per second. (Right): Negative log likelihoods (NLL) per video and speeds for HSMM models on \textsc{CrossTask}. We cannot train HSMMs beyond $2^8$ states due to GPU memory constraints, but we can train LHSMMs with up to $2^{10}$ states. Speeds are given in batches per second.
+(Left): Test perplexities and speeds for PCFG models on \textsc{Ptb}.
+The complexity of PCFG is $O(T^3|\mcN|^3)$, whereas the complexity of LPCFG is $O(T^3 |\mcN|^2N)$.
+Speeds are given in seconds per batch. %batches per second.
+(Right): Negative log likelihoods (NLL) per video and speeds for HSMM models on \textsc{CrossTask}.
+We cannot train HSMMs beyond $2^8$ states due to GPU memory constraints,
+but we can train LHSMMs with up to $2^{10}$ states.
+Speeds are given in seconds per batch. %batches per second.
 }
 \end{table}
 

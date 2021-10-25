@@ -317,20 +317,20 @@ which does not admit an exact low-rank decomposition or linearization~\citep{ste
 While the exponential kernel does not afford an exact linearization, the kernel can be approximated deterministically \citep{cotter2011approx} or stochastically \citep{rahimi2007rff}.
 The stochastic approximation is a key component of recent work on efficient attention \citep{choromanski2020performer,peng2021rfa}.}.
 We instead restrict out attention to nonnegative feature mappings\footnote{The nonnegative feature mapping ensures that the resulting scoring matrix $\Psi$ is a valid probability distribution.} $\phi:\R^D\to\R^N_+$ \citep{choromanski2020performer}, such that
-\[[\Psi]_{z_u, (z_1, z_2)} = c_{z_u} c_v \phi(f(z_u))^\top\phi(g(z_{1}, z_{2})) = K(f(z_u), g(z_1, z_2)),  \]
-where $c_{z_u},c_v$ contain normalizing constants and clamped potentials (e.g. conditional probabilities), and we use $v = (z_1,z_2)$ for brevity.
+\[[\Psi]_{z_u, (z_1, z_2)} = c_{z_u} c_{z_1,z_2} \phi(f(z_u))^\top\phi(g(z_{1}, z_{2})) = K(f(z_u), g(z_1, z_2)),  \]
+where $c_{z_u},c_{z_1,z_2}$ contain normalizing constants and clamped potentials (e.g. conditional probabilities), and we use $v = (z_1,z_2)$ for brevity.
 We refer to $K$ with a low-dimensional nonnegative feature mapping
 as an efficiently linearizable kernel.
 We then have
 \begin{equation}
     [U_e]_{z_u,n} = c_{z_u}[\phi(f(x_u))]_n 
     \qquad
-    [V_e]_{(z_1,z_2),n} = c_v [\phi(g(z_1,z_2))]_n.
+    [V_e]_{(z_1,z_2),n} = c_{z_1,z_2} [\phi(g(z_1,z_2))]_n.
 \end{equation}
 Algorithm~\ref{alg:low-rank-update} shows the role of the low-rank
 matrix-vector product in marginalization.\footnote{
 If the normalizing constants are given by $c_{z_u}$,
-they can be computed from unnormalized $\tilde{U}_e,\tilde{V}_e$ as follows: $c_{z_u} = [\tilde{U}_e\tilde{V}_e^\top\mathbf{1}]_{z_u}$ in time $O(L^{|e|}N + LN)$, and similarly for $c_{z_v}$.
+they can be computed from unnormalized $\tilde{U}_e,\tilde{V}_e$ as follows: $c_{z_u} = [\tilde{U}_e\tilde{V}_e^\top\mathbf{1}]_{z_u}$ in time $O(L^{|e|}N + LN)$, and similarly for $c_{z_1,z_2}$.
 }
 In practice, low-rank constraints can result in significant speedups. For instance, HMMs and HSMMs go from scaling quadratically
 in the number of hidden states to linearly (with a new factor of the

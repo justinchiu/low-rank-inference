@@ -774,32 +774,6 @@ Speeds are given in seconds per batch. %batches per second.
 }
 \end{table}
 
-
-
-
-\begin{comment}
-\begin{table}[!htp]
-\centering
-\begin{tabular}{lllrr}
-\toprule
-\multicolumn{4}{c}{Kernel for $B\ C $} & \multirow{2}{*}{PPL}\\
-\cmidrule{1-4}
-$\mcN\times \mcN$ & $\mcN\times\mcP$  & $\mcP\times\mcN$ & $\mcP\times\mcP$ \\
-\midrule
-  Softmax & Softmax & Softmax & Softmax & 243.19\\
-  Linear & Softmax & Softmax & Softmax & 242.72\\
-  Linear & Linear & Linear & Softmax &  259.05 \\
-  Linear & Linear & Linear & Linear & 278.60 \\
-\bottomrule
-\end{tabular}
-\caption{\label{tbl:cky-ablation}
-Ablation studies of PCFG. The perplexities are evaluated on the validation set of \textsc{Ptb}. Here we use $|\mcN|=30$, $|\mcP|=60$, and 16 features for linearlized kernel.
-}
-\end{table}
-\end{comment}
-
-
-
 \section{Related Work}
 
 % Tractable latent variable models for sequences
@@ -1055,6 +1029,67 @@ low-rank factors in each algorithm.
 \STATE $[V_{i,j,k}]_{z_1,z_2,n} = [\tilde{V}]_{z_1,z_2,n}$
 \STATE $[U_{i,j,k}]_{z_u,n} = [c]_{z_u}[\tilde{U}]_{z_u,n}$
 \STATE $\alpha_{i,k} \stackrel{+}{\gets} U_{i,j,k}(V_{i,j,k}^\top\beta_{i,j,k})$
+\ENDFOR
+\STATE \textbf{return} $\alpha_{1,T}^\top \mathbf{1}$
+\end{algorithmic}
+\end{minipage}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Low-rank hypergraph marginalization for HMMs and PCFGs (Explicit loops)}
+\label{alg:lr-marg-hmm-pcfg2}
+\begin{minipage}[t]{0.45\textwidth}
+%\small
+\begin{algorithmic}
+\STATE {[\textit{HMM - Backward}]}
+\FOR{$n \in 1,\ldots,N$}
+    \FOR {$z\in\mcL$}
+        \STATE $[\tilde{V}]_{z,n} = [\phi(g(z))]_n$
+        \STATE $[\tilde{U}]_{z,n} = [\phi(f(z))]_n$
+    \ENDFOR
+\ENDFOR
+\FOR {$z\in\mcL$}
+    \STATE $[c]_z = [\tilde{U}\tilde{V}^\top\mathbf{1}]_z$
+\ENDFOR
+
+\FOR {$t \leftarrow (t+1)$ in right-to-left order}
+    \FOR {$z_{t+1} \in \mcL$}
+        \STATE $[\beta_{t+1}]_{z_{t+1}} = [\alpha_{t+1}]_{z_{t+1}}$
+        \STATE $[V_t]_{z_{t+1},n} = [\tilde{V}]_{z_{t+1},n}$
+    \ENDFOR
+    \FOR {$z_{t} \in \mcL$}
+        \STATE $[U_t]_{z_t,n} = p(x_t \mid z_t)[c]_{z_{t}}[\tilde{U}]_{z_t,n}$
+    \ENDFOR
+    \STATE $\alpha_t \stackrel{+}{\gets} U_t(V_t^\top\beta_{t+1})$
+\ENDFOR
+\STATE \textbf{return} $\alpha_0^\top \mathbf{1}$
+\end{algorithmic}
+\end{minipage}
+\vspace{0pt}
+\begin{minipage}[t]{0.50\textwidth}
+%\small
+\begin{algorithmic} 
+\STATE {[\textit{PCFG - CKY}]}
+\FOR{$n \in 1,\ldots,N$}
+    \FOR{$z_1,z_2 \in \mcL\times \mcL$}
+        \STATE $[\tilde{V}]_{z_1,z_2,n} = [\phi(g(z_1,z_2))]_n$
+    \ENDFOR
+    \FOR{$z_u \in \mcL$}
+        \STATE $[\tilde{U}]_{z_u,n} = [\phi(f(z_u))]_n$
+    \ENDFOR
+\ENDFOR
+\FOR{$z_u \in \mcL$}
+    \STATE $[c]_{z_u} = [UV^\top\mathbf{1}]_{z_u}$
+\ENDFOR
+\FOR {$(i,k) \leftarrow (i,j), (j,k)$ in span-size order}
+    \FOR{$z_1,z_2 \in \mcL_{i,j}\times \mcL_{j,k}$}
+        \STATE $[\beta_{i,j,k}]_{(z_1,z_2)} = [\alpha_{i,j}]_{z_1}[\alpha_{j,k}]_{z_2}$
+        \STATE $[V_{i,j,k}]_{z_1,z_2,n} = [\tilde{V}]_{z_1,z_2,n}$
+    \ENDFOR
+    \FOR{$z_u \in \mcL_{i,k}$}
+        \STATE $[U_{i,j,k}]_{z_u,n} = [c]_{z_u}[\tilde{U}]_{z_u,n}$
+    \ENDFOR
+    \STATE $\alpha_{i,k} \stackrel{+}{\gets} U_{i,j,k}(V_{i,j,k}^\top\beta_{i,j,k})$
 \ENDFOR
 \STATE \textbf{return} $\alpha_{1,T}^\top \mathbf{1}$
 \end{algorithmic}

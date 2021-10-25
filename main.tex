@@ -1403,8 +1403,52 @@ Figure~\ref{fig:example_production} shows the entropy distribution of the produc
 
 In Table~\ref{tbl:cky-ablation}, we consider the effects of the mixed kernel parameterization, i.e. of replacing the softmax kernel with a linearizable kernel. In particular, we consider different combinations of preterminal / nonterminal tails $B\ C\in \mcN\times\mcN$, $B\ C\in \mcN\times\mcP$, $B\ C\in \mcP\times\mcN$, and $B\ C\in \mcP\times\mcP$ (our main model only factorizes nonterminal / nonterminal tails). Table~\ref{tbl:cky-ablation} shows that we get the best perplexity when we only use $K$ on $B\ C\in \mcN\times\mcN$, and use softmax kernel $K_\SM$ for the rest of the space. This fits with previous observations that when the label space $|\mcL|$ is large, a model with a very small rank constraint hurts performance.\footnote{In this particular ablation study, the size of $\mcN\times\mcN$ is only one-ninth of the total state space size $\{\mcN \cup \mcP\}\times \{\mcN \cup \mcP\}$.}
 
-%\section{\label{sec:pcfgvismore} PCFG Visualizations}
-%TODO
+\section{\label{sec:frontier} Speed and Accuracy Frontier Analysis}
+We provide plots of the speed and accuracy over a range of model sizes for HMMs and PCFGs,
+in Figures~\ref{fig:hmm-frontier} and \ref{fig:pcfg-frontier} respectively.
+Speed is measured in seconds per batch, and accuracy by perplexity.
+Lower is better for both.
+
+For HMMs, we range over the number of labels $L\in\set{2^{10},2^{11},2^{12},2^{13},2^{14}}$.
+For softmax HMMs, more accurate models are slower, as shown in Figure \ref{fig:hmm-frontier}.
+However, we find that for any given accuracy for a softmax model,
+there exists a similarly accurate LHMM that outspeeds it.
+While we saw earlier in Figure \ref{fig:hmm-ppl-features-dropout}
+that at smaller sizes
+the low-rank constrain hurt accuracy, a model with a larger state size but
+lower rank achieves similar accuracy at better speed compared to a small HMM.
+
+For PCFGs, we range over $L\in\set{90,180,300}$.
+We find a similar trend compared to HMMs: accuracy results in slower models,
+as shown in Figure \ref{fig:pcfg-frontier}.
+However, the LPCFG does not dominate the frontier as it did with HMMs.
+We hypothesize that this is because of the small number of labels in the model.
+In the case of HMMs, smaller softmax HMMs were more accurate than the faster low-rank versions,
+but larger LHMMs with low rank were able to achieve similar perplexity at faster speeds.
+This may be realized by exploring LPCFGs with more state sizes,
+or simply by scaling further.
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{imgs/hmm/lhmm-speed-accuracy.png}
+\caption{
+\label{fig:hmm-frontier}
+The speed, in seconds per batch, versus accuracy, in perplexity, for HMMs and LHMMs over a range of model sizes
+(1024 to 16384 labels).
+As lower is better for both measures of speed and accuracy, the frontier is the bottom left.
+}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{imgs/hmm/pcfg-speed-accuracy.png}
+\caption{
+\label{fig:pcfg-frontier}
+The speed versus accuracy for PCFGs and LPCFGs over a range of model sizes
+(90, 180, and 300 labels).
+As lower is better for both measures of speed and accuracy, the frontier is the bottom left.
+}
+\end{figure}
 
 \section{Potential Negative Impact}
 \label{sec:impact}

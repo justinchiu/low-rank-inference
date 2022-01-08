@@ -40,6 +40,14 @@
 \usepackage{subcaption}
 \usepackage{multirow}
 
+% footnote without marker
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
 
 %\title{Embedded Structured Prediction}
 %\title{Linearized Structured Models}
@@ -73,7 +81,7 @@
 \maketitle
 
 \begin{abstract}
-Structured distributions, i.e. distributions over combinatorial spaces, are commonly used to learn latent probabilistic representations from observed data. However, scaling these models is bottlenecked by the high computational and memory complexity with respect to the size of the latent representations. Common models such as Hidden Markov Models (HMMs) and Probabilistic Context-Free Grammars (PCFGs) require time and space quadratic and cubic in the number of hidden states respectively. This work demonstrates a  simple approach to reduce the computational and memory complexity of a large class of structured models. We show that by viewing the central inference step as a matrix-vector product and using a low-rank constraint, we can trade off model expressivity and speed via the rank.  Experiments with neural parameterized structured models for language modeling, polyphonic music modeling, unsupervised grammar induction, and video modeling show that our approach matches the accuracy of standard models at large state spaces while providing practical speedups.
+Structured distributions, i.e. distributions over combinatorial spaces, are commonly used to learn latent probabilistic representations from observed data. However, scaling these models is bottlenecked by the high computational and memory complexity with respect to the size of the latent representations. Common models such as Hidden Markov Models (HMMs) and Probabilistic Context-Free Grammars (PCFGs) require time and space quadratic and cubic in the number of hidden states respectively. This work demonstrates a simple approach to reduce the computational and memory complexity of a large class of structured models. We show that by viewing the central inference step as a matrix-vector product and using a low-rank constraint, we can trade off model expressivity and speed via the rank.  Experiments with neural parameterized structured models for language modeling, polyphonic music modeling, unsupervised grammar induction, and video modeling show that our approach matches the accuracy of standard models at large state spaces while providing practical speedups.
 \end{abstract}
 
 \section{Introduction}
@@ -81,7 +89,7 @@ Structured distributions, i.e. distributions over combinatorial spaces, are comm
 % structured prediction (lots of interesting tasks, general) and structured models (explicit dependencies across decisions)
 
 When modeling complex sequential spaces, such as sentences, musical scores, or video frames,
-a key choice is the internal structural representations of the model. A common choice in recent years is to use neural representations~\citep{nplm,mikolov-2011,gpt3,polyphonic,music-trans,video} to store a deterministic history. These models yield strong predictive accuracy but their deterministic, continuous forms provide little insight into the intermediate decisions of the model.
+a key choice is the internal structural representations of the model. A common choice in recent years is to use neural representations~\citep{nplm,mikolov-2011,gpt3,polyphonic,music-trans,video} to store a deterministic history. These models yield strong predictive accuracy but their deterministic, continuous forms provide little insight into the intermediate decisions of the model.\blfootnote{Code is available \href{https://github.com/justinchiu/low-rank-models}{\underline{here}}.}
 
 Latent structured models provide an alternative approach where complex modeling decisions are broken down into a series of probabilistic steps. Structured models provide a principled framework for reasoning about the probabilistic dependencies between decisions and for computing posterior probabilities. 
 %The structure of the decision processes also affords opportunities for interpretability and controllability through probabilistic inference \citep{pgm,levine2018reinforcement}.
@@ -103,14 +111,14 @@ labeled directed hypergraph, which describes a broad class
 of dynamic-programming based inference~\citep{klein2004parsing,huang2005better,zhou2006learning,javidian2020hypergraph,chiang2020factor}. We show how under low-rank constraints these models allow for more efficient inference. 
 Imposing a low-rank constraint allows for a key step of inference to be rewritten as a fast matrix-vector product.
 This approach is also inspired by recent advances in computationally efficient neural attention  attention~\citep{katharopoulos2020lineartransformer,peng2021rfa,choromanski2020performer},
-a significantly different task and formulation, that also uses  rewrites matrix-vector products as fast low-rank products using a approximate kernel techniques.
+a significantly different task and formulation, that rewrites matrix-vector products as fast low-rank products using approximate kernel techniques.
 
 We evaluate this approach by learning low-rank structured models for the tasks of language modeling, polyphonic music modeling, unsupervised grammar induction, and video modeling. For these tasks we use a variety of models including HMMs, PCFGs, and Hidden Semi-Markov Models (HSMMs).
 As the application of low-rank constraints is nontrivial in high-dimensional structured models due to reduced expressivity, we demonstrate effective techniques for overcoming several practical challenges of low-rank parameterizations.
 We find that our approach achieves very similar results to unconstrained models at large state sizes, while the decomposition allows us to greatly increase the speed of inference.
 Results on HMMs show that we can scale to more than 16,000 states; results on PCFGs achieve a significant perplexity reduction from much larger state spaces compared to past work \citep{kim2019cpcfg}; and results on HSMMs show that our formulation enables scaling to much larger state spaces for continuous emissions~\citep{fried2020learning}.
 
-\section{Latent Structure and Hypergraphs}
+\section{Background: Latent Structure and Hypergraphs}
 
 We consider the problem of modeling a sequence of observations $p(x)= p(x_1, \dots, x_T)$.
 These observations can range in complexity from the words in a sentence to a series of co-occurring musical notes,
@@ -128,18 +136,18 @@ Hypergraphs are a graphical model formalism  for structured distributions that a
 inference through dynamic programming~ \citep{klein2004parsing,huang2005better,zhou2006learning,javidian2020hypergraph,chiang2020factor}.\footnote{While the formalism is similar to undirected factor graphs,
 it allows us to represent more complex distributions: notably
 dependency structures with unknown topologies, such as latent trees.}
-Define a labeled, directed, acyclic hypergraph as a set of nodes
+A labeled, directed, acyclic hypergraph consists of a set of nodes
 $\cal V$, a set of hyperedges $\cal E$, and a designated root node $S \in {\cal V}$. 
 Each node $v \in \mcV$ has a collection of labels ${\cal L}_v$.
-Each hyperedge $e\in\mcE$ consists of a head node $u$ and tuple of tail nodes, $v = (v_1, \ldots, v_{|e|})$, where $|e|$ is the number of tail nodes.
+Each hyperedge $e\in\mcE$ has a head node $u$ and tuple of tail nodes, $v = (v_1, \ldots, v_{|e|})$, where $|e|$ is the number of tail nodes.
 For simplicity, we will assume \textit{at most} 2 tail nodes $v_1, v_2$, and unless noted, a fixed label set $\mcL$ throughout.
 Each hyperedge $e$ is associated with a score matrix $\Psi_e\in\R^{\mcL\times \mcL^{|e|}}$ 
 with a score for all head and tail labels.\footnote{This formalism can represent inference in both locally and globally normalized models, although we focus on local normalization in this work.}
 We use the notation $[\Psi_e]_{z_u,(z_1, z_2)}$ to indicate the score for head label $z_u$ and tail labels $z_1$ and $z_2$.
 Finally, we assume we have a topological ordering over the edges.
 
-A hypergraph is used to aggregate marginals bottom-up, which is done through a dynamic programming (belief propagation) algorithm. 
-Algorithm~\ref{lab:hyp-matrix}~(left) shows the algorithm. It works by filling in a table vector 
+A hypergraph is used to aggregate scores bottom-up through a dynamic programming (belief propagation) algorithm.
+Algorithm~\ref{lab:hyp-matrix}~(left) shows the algorithm. It works by filling in a table vector
 $\alpha_v \in \R^{\mcL}$ for each node $v$ in order, and is initialized to 1 at the leaf nodes.\footnote{
 The accumulation of scores is denoted by $\stackrel{+}{\gets}$.
 Multiple hyperedges can have the same head node, whose scores must be added together.}
@@ -283,31 +291,44 @@ For these structured distributions, hypergraphs provide a general method for inf
 In this section, we consider an approach for improving the scalability
 of these models by reducing the dependence of the computational complexity of inference on the label set size.
 The main idea is to speed up the matrix-vector product step in inference by using a low-rank decomposition of 
-a scoring matrix $\Psi$.
+the scoring matrix $\Psi$.
 %This is accomplished by imposing a constraint on the scoring functions which determine the entries of $\Psi$.
-In the next section we show that this constraint can easily be incorporated into parameterized versions of these models.
+In the next section we show that this constraint can be easily  incorporated into parameterized versions of these models.
 
-%\subsection{Kernelizing Hyperedges}
-\subsection{Fast Matrix-Vector Products}
-The main bottleneck for inference speed is the matrix-vector product $\alpha_u = \Psi_e\beta_v$ that must be computed for every edge in the hypergraph.
+\subsection{Low-Rank Matrix-Vector Products}
+The main bottleneck for inference speed is the matrix-vector product $\alpha_u \stackrel{+}{\gets} \Psi_e\beta_v$ that must be computed for every edge in the hypergraph.
 As we saw in Algorithm~\ref{lab:hyp-matrix} (left), this step takes time $L^{|e|+1}$ to compute,
-which can immediately be sped up by making structural assumptions
-on $\Psi_e$.
-%However, the matrix form Algorithm~\ref{lab:hyp-matrix} (right) hints that there is an alternative way to view this computation as a kernel.
+but it can be sped up by making structural assumptions
+on $\Psi_e$. In particular, we focus on scoring matrices with low rank.
 
 We note the following elementary property of matrix-vector products.
 If the scoring matrix can be decomposed as the product
-of two rank-$N$ matrices $\Psi_e = U_e V_e^\top$,
-i.e. a low-rank decomposition,
+of two smaller matrices $\Psi_e = U_e V_e^\top$,
+where $U_e \in \mathbb{R}^{\mcL \times N}$ and $V_e \in \mathbb{R}^{N\times \mcL^{|e|}}$,
 then the matrix-vector products can be computed in time
-$O(|{\cal E}|\times L^{|e|}\times N)$,
-exchanging a factor of $L$ for a factor of $N$.
-This leads to the following matrix-vector product expression for each hyperedge $e$ with $u\leftarrow v$:
+$O(|{\cal E}|\times L^{|e|}\times N)$ as follows:
+
 \begin{equation}
     \label{eqn:hypergraph-update-kernel-matrix}
     \Psi_e\beta_v =  \left(U_e V_e^\top\right) \beta_v =  U_e\left(V_e^\top\beta_v\right).
 \end{equation}
 
+This reordering of computation exchanges a factor of $L$ for a factor of $N$. When $N \ll L$, this method is both faster and more memory-efficient. 
+
+We enforce the low-rank constraint by directly parameterizing the factors $U_e$ and $V_e$ for scoring matrices $\Psi_e$ that we would like to constrain. We treat both $U_e$ and $V_e$ as embedding matrices, where each row corresponds to an embedding of each value of $z_u$ and a joint embedding of $(z_1,z_2)$ respectively:
+\begin{equation}
+    [U_e]_{z_u,n} = c_{z_u}[\phi(f(z_u))]_n 
+    \qquad
+    [V_e]_{(z_1,z_2),n} = c_{z_1,z_2} [\phi(g(z_1,z_2))]_n,
+\end{equation}
+where $f$ and $g$ are embedding functions; $c_{z_u}$ and $c_{z_1,z_2}$ are constants (used to ensure proper normalization) or clamped potentials (such as conditional probabilities); and $\phi:\R^D\to\R^N_+$ is a function that ensures nonnegativity, necessary for valid probability mass functions. 
+Algorithm~\ref{alg:low-rank-update} shows the role of the low-rank
+matrix-vector product in marginalization.\footnote{
+If the normalizing constants are given by $c_{z_u}$,
+they can be computed from unnormalized $\tilde{U}_e,\tilde{V}_e$ as follows: $c_{z_u} = [\tilde{U}_e\tilde{V}_e^\top\mathbf{1}]_{z_u}$ in time $O(L^{|e|}N + LN)$, and similarly for $c_{z_1,z_2}$.
+}
+
+\begin{comment}
 Unfortunately, not every parameterization of scoring matrices $\Psi_e$
 admits an exact low-rank decomposition.
 The most common parameterization, softmax, uses
@@ -323,18 +344,13 @@ We refer to $K$ with a low-dimensional nonnegative feature mapping
 as an efficiently linearizable kernel.
 We then have
 \begin{equation}
-    [U_e]_{z_u,n} = c_{z_u}[\phi(f(x_u))]_n 
+    [U_e]_{z_u,n} = c_{z_u}[\phi(f(z_u))]_n 
     \qquad
     [V_e]_{(z_1,z_2),n} = c_{z_1,z_2} [\phi(g(z_1,z_2))]_n.
 \end{equation}
-Algorithm~\ref{alg:low-rank-update} shows the role of the low-rank
-matrix-vector product in marginalization.\footnote{
-If the normalizing constants are given by $c_{z_u}$,
-they can be computed from unnormalized $\tilde{U}_e,\tilde{V}_e$ as follows: $c_{z_u} = [\tilde{U}_e\tilde{V}_e^\top\mathbf{1}]_{z_u}$ in time $O(L^{|e|}N + LN)$, and similarly for $c_{z_1,z_2}$.
-}
-In practice, low-rank constraints can result in significant speedups. For instance, HMMs and HSMMs go from scaling quadratically
-in the number of hidden states to linearly (with a new factor of the
-feature dimension).
+\end{comment}
+
+%In practice, low-rank constraints can result in significant speedups. For instance, HMMs and HSMMs go from scaling quadratically %in the number of hidden states to linearly (with a new factor of the feature dimension).
 
 \begin{wrapfigure}{r}{0.55\textwidth}
 \begin{minipage}{0.55\textwidth}
@@ -359,53 +375,51 @@ feature dimension).
 \end{wrapfigure}
 
 \subsection{Application to Structured Models}
-As enforcing a low-rank factorization in every conditional distribution limits the expressivity of a model,
-we explicitly target distributions that are involved in computational bottlenecks.\footnote{For a discussion of the expressivity of low-rank models compared to models with fewer labels, see Appendix~\ref{sec:expressivity}.}
-For these key distributions, we use an efficiently linearizable kernel $K$, allowing factorization of the scoring matrix.
-For other computations, we utilize a standard softmax kernel $K_\SM$ and do not factorize the resulting scoring matrix.
+As enforcing a low-rank factorization of every scoring matrix limits the expressivity of a model,
+we explicitly target scoring matrices that are involved in computational bottlenecks.\footnote{For a discussion of the expressivity of low-rank models compared to models with fewer labels, see Appendix~\ref{sec:expressivity}.}
+For these key scoring matrices, we directly parameterize the scoring matrix with a low-rank factorization, which we call a low-rank parameterization.
+For other computations, we utilize a standard softmax parameterization and do not factorize the resulting scoring matrix.
 We refer to this as a mixed parameterization.
 
 \textbf{Hidden Markov Models}
-Low-rank HMMs (LHMMs) use the following mixed kernel parameterization, which specifically targets the state-state transition bottleneck:
+Low-rank HMMs (LHMMs) use the following mixed parameterization, which specifically targets the state-state transition bottleneck by using a low-rank parameterization for the transition distribution, but a softmax parameterization for the emission distribution:
 \begin{equation}
 \begin{aligned}
-p(z_1 \mid z_0) &\propto K(\bu_{z_0}, \bv_{z_1}),&
-p(z_t \mid z_{t-1}) &\propto K(\bu_{z_{t-1}}, \bv_{z_t}),&
-p(x_t \mid z_t) &\propto K_\SM(\bu_{z_t}, \bv_{x_t}),
+p(z_t \mid z_{t-1}) &\propto \phi(\bu_{z_{t-1}})^\top \phi(\bv_{z_t}),&
+p(x_t \mid z_t) &\propto \exp(\bu_{z_t}^\top \bv_{x_t}),
 \end{aligned}
 \end{equation}
-where $\bu_{z}$ is the embedding of the head label and $\bv_{z}$
-the embedding of the tail label. 
-This allows $\Psi$ to be decomposed as the $p(x_t\mid z_t)$ terms become constants.
-The embeddings come from neural network parameterizations detailed in Appendix~\ref{sec:mlp-param}.
+where $\bu_{z_{t-1}} = f(z_{t-1})$ and $\bv_{z_t} = g(z_{t})$ are (possibly neural) embedding functions.
+The parameterizations of the embedding functions $f,g:\mcL\to\R^D$, as well as the non-negative mapping $\phi:\R^D\to\R^N_+$ are detailed in Appendix~\ref{sec:mlp-param}.
+When performing inference, we treat the emission probabilities $p(x_t\mid z_t)$ as constants,
+and absorb them into $c_u$.
 
 This allows inference to be run in time $O(TLN)$, where $T$ is the length of a sequence, $L$ the size of the label space, and $N$ the feature dimension.
 
 \textbf{Hidden Semi-Markov Models}
-The low-rank HSMM (LHSMM) uses a similar kernel parameterization:
+For low-rank HSMM (LHSMM),  we similarly target  the transition distribution and keep the standard Gaussian emission distribution:
 \begin{equation}
 \label{eqn:hsmm}
 \begin{aligned}
-p(z_1 \mid z_0) &\propto K(\bu_{z_0}, \bv_{z_1}),&
-p(z_k \mid z_{k-1}) &\propto K(\bu_{z_{k-1}}, \bv_{z_k}),&
+p(z_k \mid z_{k-1}) &\propto \bu_{z_{k-1}}^\top \bv_{z_k},&
 p(x_t \mid z_k) &\propto K_{\text{Gauss}}(\bu_{z_k}, \mathbf{x}_t),
 \end{aligned}
 \end{equation}
-where $K_{\text{Gauss}}(\cdot, \cdot)$ is the Gaussian kernel used to model continuous $\mathbf{x}_t$. The total inference complexity is $O(TLMN )$, where $M$ is the maximum length of the observation sequence under any state.
+where $\bu_{z_{k-1}} = \phi(f(z_{k-1}))$ and $\bv_{z_k} = \phi(g(z_k))$ are state embeddings, while $K_{\text{Gauss}}(\cdot, \cdot)$ is the Gaussian kernel used to model continuous $\mathbf{x}_t$. The full parameterization of the embeddings is given in Appendix \ref{sec:mlp-param}. The total inference complexity is $O(TLMN )$, where $M$ is the maximum length of the observation sequence under any state.
 
 \textbf{Context-Free Grammars}
-The PCFG uses a similar mixed parameterization to the HMM.
-These probabilities correspond to start ($S\to A$), preterminal ($D\to x$),
-and standard productions ($A\to B\ C$) respectively.
+For PCFGs, the inference bottleneck is related to the transition from a nonterminal symbol to two nonterminal symbolss ($A\to B\ C$), and we specifically parameterize it using a low-rank parameterization:
+%uses a similar mixed parameterization to the HMM.
+%These transition scores correspond to standard productions ($A\to B\ C$):
 \begin{equation}
 \label{eqn:pcfg}
 \begin{aligned}
-p(z_{1,N} \mid S ) &\propto K_\SM(\bu_{S}, \bu_{z_{1,N}}),&
-p( z_{i,j}, z_{j,k} \mid z_{i,k}) &\propto \begin{cases}
-  K_\SM(\bu_{z_{i,k}}, \bv_{z_{i,j}\ z_{j,k}}) & \substack{i+1 = j \lor \\j+1=k} \\ 
- K(\bu_{z_{i,k}}', \bv_{z_{i,j}\ z_{j,k}}) &\text{o.w.} \\
+p(z_{1,N} \mid S ) &\propto \exp(\bu_{S}^\top \bu_{z_{1,N}}),&
+p(z_{i,j}, z_{j,k} \mid z_{i,k}) &\propto \begin{cases}
+  \exp(\bu_{z_{i,k}}^\top \bv_{z_{i,j}\ z_{j,k}}) & \substack{i+1 = j \lor \\j+1=k} \\ 
+ \phi(\bu_{z_{i,k}}')^\top \phi(\bv_{z_{i,j}), z_{j,k}} &\text{o.w.} \\
 \end{cases}\\
- p(x_i \mid z_i) &\propto K_\SM(\bu_{z_i}, \bv_{x_i}),\\
+ p(x_i \mid z_i) &\propto \exp(\bu_{z_i}^\top \bv_{x_i}),\\
 \end{aligned}
 \end{equation}
 where $\bu_{z}$/$\bu_z'$ is the embedding of $z$ when $z$ is used as head,$\bv_{x}$/$\bv_{z_1, z_2}$ is the embedding of $x$/$(z_1, z_2)$ when they are used as tail. See Appendix~\ref{sec:mlp-param} for the full
@@ -413,7 +427,6 @@ parameterization, drawn from \citet{kim2019cpcfg}. Note that we limit
 the application of low-rank constraints to nonterminal to nonterminal
 productions. These productions dominate the runtime as they
 are applied at $O(T^3)$ hyperedges.
-
 This allows inference to be run in time $O(T^3L^2N)$, where $T$ is the length of a sequence, $L$ the size of the label space, and $N$ the feature dimension.
 
 
@@ -426,7 +439,7 @@ Our first set of experiments evaluate sequential models on \textsc{Penn Treebank
 %For our experiments with HMMs for language modeling,
 We use the preprocessing from \citet{mikolov-2011}. The second set of experiments is on polyphonic music modeling \citep{polyphonic}.
 We evaluate on four music datasets: Nottingham (Nott), Piano, MuseData (Muse), and JSB chorales (JSB).
-Each timestep consists of an 88-dimensional binary vector indicating whether a particular note is played. Since multiple notes may be played at the same time, the effective vocabulary size is extremely large. The third set of experiments use PCFGs for language modeling, we also use \textsc{Ptb}, but with the splits and preprocessing used in unsupervised constituency parsing \citep{shen2018prpn,shen2018ordered,kim2019cpcfg}. The last set of experiments use HSMMs for video modeling, where we use \textsc{CrossTask} \citep{zhukov2019cross} with 10\% of the training data for validation. We follow the preprocessing steps in \citet{fried2020learning} and apply PCA to project features to vectors of size 200. For the full data details, please see Appendix~\ref{sec:data}.
+Each timestep consists of an 88-dimensional binary vector indicating whether a particular note is played. Since multiple notes may be played at the same time, the effective vocabulary size is extremely large. The third set of experiments use PCFGs for language modeling, we also use \textsc{Ptb}, but with the splits and preprocessing used in unsupervised constituency parsing \citep{shen2018prpn,shen2018ordered,kim2019cpcfg}. The last set of experiments use HSMMs for video modeling, where we use \textsc{CrossTask} \citep{zhukov2019cross} with 10\% of the training data for validation. We follow the preprocessing steps in \citet{fried2020learning} and apply PCA to project features to vectors of size 200. For the full details on datasets, please see Appendix~\ref{sec:data}.
 
 \textbf{Models and Hyperparameters}
 %\begin{comment}
@@ -471,11 +484,14 @@ and the number of features is varied.}
 
 \textbf{Hidden Markov Models for Language Modeling}
 \begin{figure}[t]
+\centering
 \begin{subfigure}[t]{0.40\textwidth}
-\includegraphics[height=4.5cm,trim={0 0 5cm 0}, clip]{imgs/hmm/lhmm-states-features-dropout.png}
+\centering
+\includegraphics[height=4.5cm,trim={0 0 6.5cm 0}, clip]{imgs/hmm/lhmm-states-features-dropout.png}
 \end{subfigure}
-\hspace{1.5em}
+\hspace{1.25em}
 \begin{subfigure}[t]{0.50\textwidth}
+\centering
 \includegraphics[height=4.5cm]{imgs/hmm/lhmm-states-features-speed-log.png}
 \end{subfigure}
 \caption{
@@ -574,8 +590,9 @@ Fig.~\ref{fig:music} (left) shows that the distinction drops with more states. B
 \centering
 \begin{subfigure}{0.45\textwidth}
 \centering
-\includegraphics[height=4.5cm,trim={0 0 14.5em 0},clip]{imgs/hmm/music-states-features-dropout.png}
+\includegraphics[height=4.5cm,trim={0 0 0em 0},clip]{imgs/hmm/music-states-features-dropout.png}
 \end{subfigure}
+\hspace{0.75em}
 \begin{subfigure}{0.50\textwidth}
 \centering
 \begin{tabular}{lrrrr}
@@ -731,7 +748,7 @@ LHSMM & $2^{10}$ & $2^4$ & $1.423e5$ \\ % 142,291.8286
 \centering
 \begin{tabular} {lllrrrr}
 \toprule
-$|\mathcal{N}|$ & $|\mathcal{P}|$ & Model & $N$ &  PPL & Seconds\\ %Batch/s\\
+$|\mathcal{N}|$ & $|\mathcal{P}|$ & Model & $N$ &  PPL & Secs\\ %Batch/s\\
 \midrule
 30  & 60    & PCFG & - & 252.60 &  0.23\\  %4.37\\
     &       & LPCFG & 8 &  247.02    & 0.27\\ %3.75\\
@@ -750,7 +767,10 @@ $|\mathcal{N}|$ & $|\mathcal{P}|$ & Model & $N$ &  PPL & Seconds\\ %Batch/s\\
 \hfill
 \begin{tabular} {lllrrrr}
 \toprule
-Model & $L$ & $N$ & NLL & Seconds \\ %Batch/s \\
+Model & $L$ & $N$ & NLL & Secs \\ %Batch/s \\
+\midrule
+%\citet{fried2020learning} & $\le$151 & - & $1.432e5$ & -\\ % 143195.5214
+HSMM\footnote{We report the NLL of the baseline model taken from \citet{fried2020learning}, where every label corresponds to one of 151 possible actions.} & 151 & - & $1.432e5$ & -\\ % 143195.5214
 \midrule
 HSMM & $2^6$ & - & $1.428e5$ & 0.78\\ %1.28 \\
 HSMM & $2^7$ & - & $1.427e5$  & 2.22\\ %0.45\\
@@ -787,14 +807,17 @@ Other structures have also been explored, such as aligning the states of an HMM 
 Additionally, other methods take advantage of emission structure in HMMs in order to scale, such as the Cloned HMM \citep{dedieu2019learning} and VL-HMM \citep{chiu2020scaling}.
 Compared to these approaches, our method is more flexible and generic, since it can be applied in a non-application-specific manner, and even extended with high-rank components (such as banded structure).
 
-Low-rank structure has been explored in both HMMs~\citep{rrhmm} and a generalization of PCFGs called weighted tree automata~\citep{rrpcfg}. The reduced-rank HMM~\citep{rrhmm} has at most 50 states, and relies on spectral methods for training.  The low-rank weighted tree automata~\citep{rrpcfg} also trains latent tree models via spectral methods. We extend the low-rank assumption to neural parameterizations, which have been shown to be effective for generalization \citep{kim2019cpcfg,chiu2020scaling}, and directly optimize the evidence via gradient descent.
+Low-rank structure has been explored in both HMMs~\citep{rrhmm}, a generalization of PCFGs called weighted tree automata~\citep{rrpcfg}, and conditional random fields~\citep{thai2018embedded}. The reduced-rank HMM~\citep{rrhmm} has at most 50 states, and relies on spectral methods for training.  The low-rank weighted tree automata~\citep{rrpcfg} also trains latent tree models via spectral methods. We extend the low-rank assumption to neural parameterizations, which have been shown to be effective for generalization \citep{kim2019cpcfg,chiu2020scaling}, and directly optimize the evidence via gradient descent.
+Finally, \citet{thai2018embedded} do not take advantage of the low-rank parameterization of their CRF potentials for faster inference via low-rank matrix products, a missed opportunity.
+Instead, the low-rank parameterization is used only as a regularizer, with the full potentials instantiated during inference.
 
-Concurrent work in unsupervised parsing uses a tensor decomposition to scale PCFGs to large state spaces \citep{yang2021pcfgs}. Our low-rank decomposition of the flattened head-tail scoring matrix is more general, resulting in worse scaling for the PCFG setting but with wider applicability, as shown by experiments with HMMs.% and HSMMs.
+Concurrent work in unsupervised parsing uses a tensor decomposition to scale PCFGs to large state spaces \citep{yang2021pcfgs}. Our low-rank decomposition of the flattened head-tail scoring matrix is more general, resulting in worse scaling for the PCFG setting but with wider applicability, as shown by experiments with HMMs and HSMMs.
 
-% is this really necessary? Yes, I think
+\begin{comment}
+% Not necessary after removing all kernels
 Kernels have been used in non-parametric belief propagation for graphical models~\citep{song2011kernelbp,song2010kernelhmm,song2011kerneltree}, with the goal of performing approximate inference in complicated, non-conjugate models.
 We utilize kernels in the context of standard models, then scale them to massive sizes.
-
+\end{comment}
 
 %Since we turn to kernels to improve computational efficiency by introducing constraints, our work contrasts with much of the focus ernels to increase model flexibility~\citep{svm}.
 
@@ -814,10 +837,11 @@ Our approach applies to a wide class of models, including HMMs, HSMMs, and PCFGs
 
 \begin{ack}
 We thank Nikita Kitaev for the discussion that sparked this project.
-We thank Sam Wiseman and the anonymous reviewers for helpful feedback.
+We thank Sam Wiseman, Jack Morris, and the anonymous reviewers for valuable feedback.
+Yuntian Deng is sponsored by NSF 1704834, Alexander Rush by NSF CAREER 1845664, and Justin Chiu by an Amazon research award.
+
+%Yuntian -> NSF 1704834, AMR -> NSF CAREER 1845664, JC Amazon Research Award
 \end{ack}
-
-
 
 \bibliography{bib}
 \bibliographystyle{plainnat}
@@ -894,10 +918,106 @@ We thank Sam Wiseman and the anonymous reviewers for helpful feedback.
 %\section{Appendix}
 \section{\label{sec:expressivity}Expressivity of Low-Rank Models}
 We focus on the simplest case of HMMs for an analysis of expressivity.
-In the case of Gaussian emissions, \citet{rrhmm} show that for a single timestep a model with more states but low rank is more expressive than a model with fewer states. {\color{red}<- Double check this}
-In the case of discrete emissions, however, the emission distribution for a single timestep is not more expressive. Instead, we show that there exist joint marginal distributions of $x$ over multiple timesteps that are not captured by models with fewer states.
-{\color{red}Copy paste proof here}
+In the case of Gaussian emissions, a model with more states but low rank is more expressive than a model with fewer states because for a single timestep, a larger mixture of Gaussians is more expressive.
+In the case of discrete emissions, however, the emission distribution for a single timestep (i.e. $\sum_{z} p(x, z)$) is not more expressive. Instead, we show that there exists joint marginal distributions of discrete $x$ over multiple timesteps that are captured by large state but low-rank HMMs, but not expressible by models with fewer states.
 
+We construct a counter-example with a sequence of length $T=2$ and emission space of $x_t \in \set{0,1,2}$.
+We show that a 3-state HMM with rank 2, HMM-3-2, with manually chosen transitions and emissions, cannot be modeled by any 2-state HMM.
+The transition probabilities for the HMM-3-2 are given by (rows $z_t$, columns $z_{t+1}$)
+$$
+p(z_{t+1} |z_{t})
+= \begin{bmatrix}
+    \frac{1}{3} & \frac{1}{3} & \frac{1}{3} \\
+    0 & 1 & 0 \\
+    \frac{1}{2} & 0 & \frac{1}{2}
+\end{bmatrix}
+=  \begin{bmatrix}
+    \frac{1}{3} & \frac{2}{3} \\
+    1 & 0 \\
+    0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+    0 & 1 & 0 \\
+    \frac{1}{2} & 0 & \frac{1}{2}
+\end{bmatrix} = UV^T,
+$$
+emission probabilities by (rows $z_t$, columns $x_t$):
+$$p(x_t|z_t) = \begin{bmatrix}1 &0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 &1\end{bmatrix},$$
+and starting distribution
+$$P(z_1\mid z_0) = \begin{bmatrix}\frac{1}{3} & \frac{1}{3} & \frac{1}{3} \end{bmatrix}.$$
+This yields the following marginal distribution (row $x_1$, column $x_2$):
+$$
+p(x_1, x_2) = \begin{bmatrix}
+    \frac{1}{9} & \frac{1}{9} & \frac{1}{9} \\
+    0 & \frac{1}{3} & 0 \\
+    \frac{1}{6} & 0 & \frac{1}{6}
+\end{bmatrix}.
+$$
+
+Next, we show that there does not exist a 2-state HMM that can have this marginal distribution.
+Assuming the contrary, that there exists a 2-state HMM that has this marginal distribution, we will first show that there is only one possible emission matrix. We will then use that to further show that the posterior, then transitions also must be sparse, resulting in a marginal emission distribution that contradicts the original assumption.
+
+We start by setting up a system of equations. The marginal distribution over observations is obtained by summing over $z_1,z_2$:
+$$p(x_1,x_2) = \sum_{z_2}\left(\sum_{z_1}p(x_1,z_1,z_2)\right)p(x_2\mid z_2).$$
+Let the inner term be $f(x_1,z_1) = \sum_{z_1}p(x_1,z_1,z_2)=p(x_1,z_2)$.
+In a small abuse of notation, let $p(x_2\mid z_2=0)$ be a row vector with entries $[p(x_2\mid z_2=0)]_{x} = p(x_2=x\mid z_2=0)$, and similarly for $p(x_2 \mid z_2=1)$.
+We then have, first summing over $z_1$,
+$$
+P(x_1, x_2)
+=  \begin{bmatrix}
+    \frac{1}{9} & \frac{1}{9} & \frac{1}{9} \\
+    0 & \frac{1}{3} & 0 \\
+    \frac{1}{6} & 0 & \frac{1}{6}
+\end{bmatrix}
+= \begin{bmatrix} f(0, 0) & f(0, 1) \\ f(1, 0) & f(1, 1) \\ f(2, 0) & f(2, 1) \end{bmatrix}
+\begin{bmatrix}
+p(x_2|z_2=0) \\ 
+p(x_2|z_2=1)
+\end{bmatrix}.
+$$
+
+We can determine the first row of the emission matrix, $p(x_2\mid z_2=0)$ from the second row of this system of equations,
+rewritten here:
+$$
+p(x_2 \mid x_1=1) = f(1,0) p(x_2|z_2=0) + f(1,1)p(x_2|z_2=1)= \begin{bmatrix}0 & \frac{1}{3} & 0 \end{bmatrix}.$$
+We can deduce that $f(1,0),f(1,1)>0$, otherwise $p(x_1,x_2=1) = 0 \ne \frac{1}{3}$. Without loss of generality, assume $f(1,0)> 0$, then $p(x_2=0|z_2=0)=p(x_2=2|z_2=0)=0$, since $p(x_1=1, x_2=0) = p(x_1=1,x_2=2) = 0$. Therefore,
+$$p(x_2|z_2=0)=\begin{bmatrix}0 & 1& 0 \end{bmatrix}.$$
+
+We can similarly determine the second row of the emission matrix, $p(x_2\mid z_2=1)$, from the last row of the system of equations:
+$$
+p(x_2 \mid x_1=2) = f(2,0) p(x_2|z_2=0) + f(2,1)p(x_2|z_2=1)= \begin{bmatrix} \frac{1}{6} &0 &  \frac{1}{6} \end{bmatrix}.$$
+As we determined that $p(x_2|z_2=0)=\begin{bmatrix}0 & 1& 0 \end{bmatrix}$, $f(2,0)$ must be 0, otherwise $p(x_2=1|x_1=2)>0$. Therefore $f(2,1)p(x_2|z_2=1)= \begin{bmatrix} \frac{1}{6} &0 &  \frac{1}{6} \end{bmatrix}$, yielding $$p(x_2|z_2=1)= \begin{bmatrix} \frac{1}{2} &0 &  \frac{1}{2} \end{bmatrix}.$$
+
+Putting it together, the full emission matrix is given by
+$$p(x_t|z_t)=\begin{bmatrix}0 & 1& 0\\  \frac{1}{2} &0 &  \frac{1}{2}  \end{bmatrix}.$$
+This allows us to find the posterior distribution $p(z_1 \mid x_1)$ via Bayes' rule:
+$$
+    p(z_1=1 \mid x_1=1) = \frac{p(x_1=1\mid z_1=1)p(z_1)}{p(x_1=1)}=
+    \frac{0\cdot p(z_1)}{p(x_1=1)} = 0,
+$$
+implying $p(z_1=0\mid x_1=1) = 1$.
+By similar reasoning, we have $p(z_1=1\mid x_1=0) = 1$ and $p(z_1=1\mid x_1=2) = 1$.
+
+Given the sparse emissions and posteriors, we will show that the transitions must be similarly sparse, resulting in an overly sparse marginal distribution over emissions (contradiction).
+We can lower bound 
+$$0 = p(x_2=1\mid x_1=2)\ge p(x_2=1\mid z_2=0)p(z_2=0\mid z_1=1)p(z_1=1\mid x_1=2)$$
+by the definition of total probability and nonnegativity of probability.
+Then, substituting $p(x_2=1 \mid z_2=0)=1$, we have
+$$0 = p(x_2=1\mid x_1=2) \ge p(z_2=0\mid z_1=1),$$
+from which we can deduce $p(z_2=0 \mid z_1=1)=0$.
+
+Now, we will show that $p(x_2=1\mid x_1=0)=0$, which contradicts the marginal distribution.
+We have
+\begin{align*}
+p(x_2=1 \mid x_1=0)
+&= \sum_{z_1,z_2}p(x_2=1\mid z_2)p(x_2\mid z_1)p(z_1\mid x_1=0)\\
+&= p(x_2=1\mid z_2=1)p(z_2=1\mid z_1=1)p(z_1=1 \mid x_1=0),
+\end{align*}
+where we obtained the second equality because $p(z_1=0\mid x_1=0)=0$ and $p(z_2=0\mid z_1=1)$.
+As $p(x_2=1\mid z_1=1)=0$, we have $p(x_2=1\mid z_1=1)=0\ne\frac{1}{3}$. As this is a contradiction, we have shown that there exists a marginal distribution modelable with a 3-state HMM with rank 2, but not a 2-state HMM.
+
+\begin{comment}
+{\color{red}Proof copy-pasted here for reference, can ignore everything up until end copy paste}
 even in the discrete case, an HMM with a transition matrix of rank N cannot always be converted to an equivalent HMM with N states: while a rank-N HMM can be converted to an N-dimensional PSR (Predictive State Representations), PSRs are a larger class than HMMs (the states of PSRs are N-dimensional continuous vectors). In fact, Siddiqi et al 2010 [rrhmm] mentioned “So, rank-k RR-HMMs (which can have m >> k states) can model sets of predictive distributions which k-state HMMs cannot.” (Section 2.1, last paragraph, note that this statement does not specify whether it's discrete or continuous).
 
 We can use a concrete example to show that there are distributions that rank-N HMMs can model but N-state HMMs cannot: let sequence length $T=2$, rank $N=2$, observations $x_t\\in\\{0, 1, 2\\}$.
@@ -954,6 +1074,7 @@ so $z_2$ must also be $b$ because $b$ cannot transit to $a$.
 Then $P(x_2=1|x_1=0)$ would also be 0 since $b$ cannot emit 1,
 contradicting the given marginals.
 
+{\color{red}Proof}
 Below provides a more rigorous argument.
 
 There does not exist any 2-state HMM with the above marginal distribution.
@@ -986,7 +1107,8 @@ Putting the above two paragraphs together, we have the full emission matrix now:
 Using this emission matrix, we can find deterministic posterior mappings from observed variables $x_1$ to latent variables $z_1$. First, since $P(x_1=1|z_1=1)=0$ , we have $P(z_1=1|x_1=1)=0$ using Bayes’ rule, so $P(z_1=0|x_1=1)=1$. Similarly, we can prove that $P(z_1=1|x_1=0)=1$ and $P(z_1=1|x_1=2)=1$.
 
 Now we can find a contradiction when we consider transitions from $z_1$ to $z_2$: first we will prove that $z_1=1$ cannot transit to $z_2=0$ and can only transit to $z_2=1$:  $P(x_2=1|x_1=2)\ge P(x_2=1, z_2=0, z_1=1|x_1=2) = P(x_2=1|z_2=0)P(z_2=0|z_1=1)P(z_1=1|x_1=2)$, substituting  $P(z_1=1|x_1=2)=1$ and $P(x_2=1|z_2=0)=1$ into this inequality, we have $P(x_2=1|x_1=2)\ge P(z_2=0|z_1=1)$. Since $P(x_2=1|x_1=2)=0$, we have $P(z_2=0|z_1=1)=0$. Then we will show that $P(x_2=1|x_1=0)$ must be 0 since $z_1|x_1=0$ has to be 1 and it can only transit to $z_2=1$ which cannot emit $x_2=1$:  $P(x_2=1|x_1=0) = \sum_{z_1, z_2}P(x_2=1, z_1, z_2|x_1=0) =  \sum_{z_1, z_2}P(x_2=1 | z_2)P(z_2|z_1) P(z_1|x_1=0)$. Since $P(z_1=0|x_1=0)=0$, $P(x_2=1|x_1=0) =\sum_{z_2} P(x_2=1|z_2)P(z_2|z_1=1)P(z_1=1|x_1=0)$. Since $P(z_2=0|z_1=1)=0$, this sum can further reduce to $P(x_2=1|x_1=0) =P(x_2=1|z_2=1)P(z_2=1|z_1=1)P(z_1=1|x_1=0)$. Using the emission matrix, $P(x_2=1|z_2=1)=0$, so $P(x_2=1|x_1=0) =0$, which contradicts the desired marginal $P(x_2=1|x_1=0) =\frac{1}{3}$. Therefore, we have completed the proof that it is impossible to use an HMM with 2 states to get the same marginal distribution.
-
+{\color{red}end copy paste}
+\end{comment}
 
 \section{\label{sec:low-rank-marg}Low-Rank Hypergraph Marginalization for HMMs and PCFGs}
 We provide the low-rank hypergraph marginalization algorithms for HMMs and PCFGs in
@@ -994,8 +1116,7 @@ Alg.~\ref{alg:lr-marg-hmm-pcfg},
 with loops over labels $z$ (and products of labels) and feature dimensions $n$ left implicit for brevity.
 We also assume that the label sets for PCFG are uniform for brevity -- in practice,
 this can easily be relaxed (this was not assumed in Alg.~\ref{fig:marg-hmm-pcfg}).
-We show how the normalizing constants $c$ are explicitly computed using the unnormalized
-low-rank factors in each algorithm.
+We show how the normalizing constants $c$ are explicitly computed using the unnormalized low-rank factors in each algorithm.
 
 \begin{algorithm}[H]
 \caption{Low-rank hypergraph marginalization for HMMs and PCFGs}
@@ -1035,6 +1156,7 @@ low-rank factors in each algorithm.
 \end{minipage}
 \end{algorithm}
 
+\begin{comment}
 \begin{algorithm}[H]
 \caption{Low-rank hypergraph marginalization for HMMs and PCFGs (Explicit loops)}
 \label{alg:lr-marg-hmm-pcfg2}
@@ -1045,6 +1167,8 @@ low-rank factors in each algorithm.
 \FOR{$n \in 1,\ldots,N$}
     \FOR {$z\in\mcL$}
         \STATE $[\tilde{V}]_{z,n} = [\phi(g(z))]_n$
+    \ENDFOR
+    \FOR {$z\in\mcL$}
         \STATE $[\tilde{U}]_{z,n} = [\phi(f(z))]_n$
     \ENDFOR
 \ENDFOR
@@ -1095,6 +1219,7 @@ low-rank factors in each algorithm.
 \end{algorithmic}
 \end{minipage}
 \end{algorithm}
+\end{comment}
 
 \section{Extension of the Low-Rank Constraint to Other Semirings}
 Enforcing low-rank constraints in the scoring matrices $\Psi_e$
@@ -1182,29 +1307,29 @@ To compute $p(x)$, we can marginalize $l, z$ using dynamic programming similar t
 In this section, we present more details on the parameterizations of the HMM, PCFG, and HSMM.
 The main detail is where and how are neural networks used to parameterize state representations.
 
-For low-rank HMMs (LHMMs) we  use the following mixed kernel parameterization that specifically targets the state-state bottleneck:
+For low-rank HMMs (LHMMs) we  use the following mixed parameterization that specifically targets the state-state bottleneck:
 \begin{equation}
 \begin{aligned}
-p(z_1 \mid z_0) &\propto K(f_1(\bu_{z_0}), \bv_{z_1}), &
-p(z_t \mid z_{t-1}) &\propto K(\bu_{z_{t-1}}, \bv_{z_t}), &
-p(x_t \mid z_t) &\propto K_\SM(\bu_{z_t}, f_2(\bv_{x_t})),
+p(z_1 \mid z_0) &\propto \phi(f_1(\bu_{z_0}))^\top \phi(\bv_{z_1})\\
+p(z_t \mid z_{t-1}) &\propto \phi(\bu_{z_{t-1}})^\top \phi(\bv_{z_t})\\
+p(x_t \mid z_t) &\propto \exp(\bu_{z_t}^\top f_2(\bv_{x_t})),
 \end{aligned}
 \end{equation}
-where $\bu_{z}$ is the embedding of $z$ when $z$ is used as head, $\bv_{z}$ its embedding when used as tail, and $f_1, f_2$ are MLPs with two residual layers. The efficiently linearizable kernel $K$ uses the feature map $\phi(x) = \exp(Wx)$. 
+where $\bu_{z}$ is the embedding of $z$ when $z$ is used as head, $\bv_{z}$ its embedding when used as tail, $f_1,f_2$ are MLPs with two residual layers, and feature map $\phi(x) = \exp(Wx)$. 
 
 The PCFG uses a similar mixed parameterization. These probabilities correspond to start ($S\to A$), preterminal ($T\to x$), and standard productions ($A\to B\ C$) respectively.
 \begin{equation}
 \label{eqn:pcfgparam}
 \begin{aligned}
-p(z_{1,N} \mid S ) &\propto K_\SM(f_1(\bu_{S}), \bu_{z_{1,N}}),\\
-p(x_i \mid z_i) &\propto K_\SM(\bu_{z_i}, f_2(\bv_{x_i})),\\
+p(z_{1,N} \mid S ) &\propto \exp(f_1(\bu_{S})^\top \bu_{z_{1,N}})\\
+p(x_i \mid z_i) &\propto \exp(\bu_{z_i}^\top f_2(\bv_{x_i}))\\
 p( z_{i,j}, z_{j,k} \mid z_{i,k}) &\propto \begin{cases}
-  K_\SM(\bu_{z_{i,k}}, \bv_{z_{i,j}\ z_{j,k}}) & \substack{i+1 = j \lor \\j+1=k} \\ 
- K(\bu_{z_{i,k}}', \bv_{z_{i,j}\ z_{j,k}}) &\text{o.w.} \\
+  \exp(\bu_{z_{i,k}}^\top \bv_{z_{i,j}, z_{j,k}}) & \substack{i+1 = j \lor \\j+1=k} \\ 
+ \phi(\bu_{z_{i,k}}')^\top \phi(\bv_{z_{i,j}, z_{j,k}}) &\text{o.w.} \\
 \end{cases}\\
 \end{aligned}
 \end{equation}
-where $\bu_{z}$/$\bu_z'$ is the embedding of $z$ when $z$ is used as head,$\bv_{x}$/$\bv_{z_1, z_2}$ is the embedding of $x$/$(z_1, z_2)$ when they are used as tail, and $f_1, f_2$ are MLPs with two residual layers as in \citet{kim2019cpcfg}. The efficiently linearizable kernel $K$ uses the feature map $\phi(x) = \exp(Wx - \|x\|_2^2/2)$.
+where $\bu_{z}$/$\bu_z'$ is the embedding of $z$ when $z$ is used as head,$\bv_{x}$/$\bv_{z_1, z_2}$ is the embedding of $x$/$(z_1, z_2)$ when they are used as tail, and $f_1, f_2$ are MLPs with two residual layers as in \citet{kim2019cpcfg}. We use the feature map $\phi(x) = \exp(Wx - \|x\|_2^2/2)$.
 
 For both HMMs and neural PCFG models, we use the same parameterization of the MLPs $f_1$ and $f_2$ as \citet{kim2019cpcfg}:
 \begin{equation}
@@ -1218,18 +1343,18 @@ with $i,j \in \set{1,2}$, and
 $W_i,V_{i,j},U_{i,j} \in \R^{D \times D}$. 
 
 
-For HSMMs, the baseline ({HSMM} in Table~\ref{tbl:cky}) follows the fully unsupervised setting in \citet{fried2020learning} except that we don't apply any state constraints from the prior knowledge of each task.\footnote{We got rid of those constraints to allow for changing the total number of states, since otherwise we can't make any changes under a predefined state space.} The model maintains a log transition probability lookup table for $p(z_k \mid z_{k-1})$, a lookup table for the log of the parameters of the Poisson distribution $\lambda_{z_k}$. We maintain a mean and a diagonal covariance matrix for the Gaussian distribution $p(x_i\mid z_k)$ for each $z_k$. For low-rank HSMMs (LHSMMs), we use the same linearizable kernel parameterization for $p(z_k \mid z_{k-1})$ as in HMMs:
+For HSMMs, the baseline ({HSMM} in Table~\ref{tbl:cky}) follows the fully unsupervised setting in \citet{fried2020learning} except that we don't apply any state constraints from the prior knowledge of each task.\footnote{We got rid of those constraints to allow for changing the total number of states, since otherwise we can't make any changes under a predefined state space.} The model maintains a log transition probability lookup table for $p(z_k \mid z_{k-1})$, a lookup table for the log of the parameters of the Poisson distribution $\lambda_{z_k}$. We maintain a mean and a diagonal covariance matrix for the Gaussian distribution $p(x_i\mid z_k)$ for each $z_k$. For low-rank HSMMs (LHSMMs), we use the same parameterization for $p(z_k \mid z_{k-1})$ as in HMMs:
 \begin{equation}
-    p(z_k \mid z_{k-1}) \propto K(\bu_{z_{t-1}}, \bv_{z_t}),
+    p(z_k \mid z_{k-1}) \propto \phi(\bu_{z_{t-1}})^\top \phi(\bv_{z_t}),
 \end{equation}
-where $\bu_{z}$ is the embedding of $z$ when $z$ is used as head, $\bv_{z}$ its embedding when used as tail.  The linearizable kernel $K$ uses the feature map $\phi(x) = \exp(Wx)$. The emission parameterization is the same as in baseline HSMMs.
+where $\bu_{z}$ is the embedding of $z$ when $z$ is used as head, $\bv_{z}$ its embedding when used as tail, and the feature map $\phi(x) = \exp(Wx)$. The emission parameterization is the same as in baseline HSMMs, a Gaussian kernel.
 
 \section{\label{sec:opt}Initialization and Optimization Hyperparameters}
-We initialize the parameters of feature maps in linearizable kernels using orthogonal feature projections \citep{choromanski2020performer}, and update it alongside the model parameters during training.
+We initialize the parameters $W$, in $\phi(x) = \exp(Wx)$ and variants, of feature maps using orthogonal feature projections \citep{choromanski2020performer}, and update it alongside the model parameters during training.
 
 HMM parameters are initialized with the Xavier initialization \citep{glorot2010understanding}.\footnote{
 For banded experiments, we initialize the band parameters by additionally adding 30 to each element.
-Without this the band scores were too small compared to the kernel scores, and were ignored by the model.
+Without this the band scores were too small compared to the exponentiated scores, and were ignored by the model.
 }
 We use the AdamW \citep{adamw} optimizer with a learning rate of $0.001$, $\beta_1=0.9,\beta_2=0.999$, weight decay 0.01, and a max grad norm of 5.
 We use a state dropout rate of 0.1, and additionally have a dropout rate of 0.1 on the feature space of LHMMs.
@@ -1242,8 +1367,7 @@ For the polyphonic music datasets, we use the same hyperparameters as the langua
 For PCFGs, parameters are initialized with the Xavier uniform initialization \citep{glorot2010understanding}.
 We follow the experiment setting in \citet{kim2019cpcfg} and use the Adam \citep{kingma2017adam} optimizer with $\beta_1=0.75,\beta_2=0.999$, a max grad norm of 3, and we tune the learning rate from $\{0.001, 0.002\}$ using validation perplexity. We train for 15 epochs with a batch size of 4. The learning rate is not annealed over training, but a curriculum learning approach is applied where only sentences of at most length 30 are considered in the first epoch. In each of the following epochs, the longest length of sentences considered is increased by 1.
 
-For HSMMs, we use the same initialization and optimization hyperparameters as \citet{fried2020learning}: The Gaussian means and covariances are initialized with empirical means and covariances (the Gaussian parameters for all states are initialized the same way and they only diverge through training). The transition matrix is initialized to be uniform distribution for baseline HSMMs, and the transition embeddings are initialized using the Xavier initialization for LHSMMs. The log of Poisson parameters are initialized to be 0. We train all models for 4 epochs using the Adam optimizer with initial learning rate of 5e-3, and we reduce the learning rate 80\% when log likelihood doesn't improve over the previous epoch. We clamp the learning rate to be at least 1e-4. We use a batch size of 5 following \citet{fried2020learning}, simulated by accumulating gradients under batch size 1 in order to scale up the number of states as much as we can. Gradient norms are clipped to be at most 10 before updating. Training take 1-2 days depending on the number of states and whether a linearizable kernel is used.
-
+For HSMMs, we use the same initialization and optimization hyperparameters as \citet{fried2020learning}: The Gaussian means and covariances are initialized with empirical means and covariances (the Gaussian parameters for all states are initialized the same way and they only diverge through training). The transition matrix is initialized to be uniform distribution for baseline HSMMs, and the transition embeddings are initialized using the Xavier initialization for LHSMMs. The log of Poisson parameters are initialized to be 0. We train all models for 4 epochs using the Adam optimizer with initial learning rate of 5e-3, and we reduce the learning rate 80\% when log likelihood doesn't improve over the previous epoch. We clamp the learning rate to be at least 1e-4. We use a batch size of 5 following \citet{fried2020learning}, simulated by accumulating gradients under batch size 1 in order to scale up the number of states as much as we can. Gradient norms are clipped to be at most 10 before updating. Training take 1-2 days depending on the number of states and whether a low-rank constraint is used.
 
 We use the following hardware for our experiments: for HMMs we run experiments on 8 Titan RTX GPUs with 24G of memory on an internal cluster. For PCFGs and HSMMs we run experiments on 1 Nvidia V100 GPU with 32G of memory on an internal cluster.
 
@@ -1276,15 +1400,15 @@ At larger state sizes, the ranks of learned matrices are almost half of their ma
         LHMM & 4096 & 512 & 507 & 3186 & 163\\
         \bottomrule
     \end{tabular}
-    
-    \caption{\label{tbl:hmm-rank}Ranks and validation perplexities for HMMs and LHMMs. The number of states is given by $L$ and the dimensionality of the feature space by $N$. The HMM uses a softmax/exponential kernel for the emission, and therefore does not have a value for $N$. The transition matrix is denoted by $A$, and the emission matrix by $O$. The rank was estimated by counting the number of singular values greater than 1e-5.
+    \vspace{0.5em}
+    \caption{\label{tbl:hmm-rank}Ranks and validation perplexities for HMMs and LHMMs. The number of states is given by $L$ and the dimensionality of the feature space by $N$. The HMM uses softmax for the emission, and therefore does not have a value for $N$. The transition matrix is denoted by $A$, and the emission matrix by $O$. The rank was estimated by counting the number of singular values greater than 1e-5.
     Models were trained with 0.1 state and feature dropout.}
 \end{table}
 
 
 \section{Low-rank and Banded HMM Parameterization}
 \label{sec:banded}
-One limitation of the efficiently linearizable kernel parameterization of the transition matrix of the LHMM is that it limits the transition matrix to have at most rank $N < L$. Such a limitation would render a model unable to fit the identity matrix, which would have rank $L$. 
+In some scenarios, the low-rank constraint may be too strong. For example, a low-rank model is unable to fit the identity matrix, which would have rank $L$. 
 In order to overcome this limitation, we extend the low-rank model while preserving the computational complexity of inference.
 We perform experiments with an additional set of parameters $\theta \in\R^{L\times L}$ which allow the model to learn high-rank structure (the experimental results can be found in Tbl.~\ref{tbl:hmm}).
 We constrain $\theta$ to have banded structure,
@@ -1361,6 +1485,7 @@ HMM &  2.43 & 8.51 & 7.34 & 5.74 \\
 LHMM & 2.60 & 8.89 & 7.60 & 5.80 \\
 \bottomrule
 \end{tabular}
+\vspace{0.5em}
 \caption{\label{tbl:full-music}
 Polyphonic music negative log-likelihood, measured in nats.
 The HMM models have $\mcL=2^{11}$ states and the LHMM has rank $N=2^{9}$, a 4:1 state:rank ratio.
@@ -1372,14 +1497,14 @@ The HMM models have $\mcL=2^{11}$ states and the LHMM has rank $N=2^{9}$, a 4:1 
   \begin{subfigure}[t]{0.45\textwidth}
   \centering
   \includegraphics[width=0.9\textwidth]{imgs/softmax/entropy.png}
-  \caption{Softmax Kernel $K_\SM$}
+  \caption{Softmax Parameterization}
   \end{subfigure}
   \begin{subfigure}[t]{0.45\textwidth}
   \centering
   \includegraphics[width=0.9\textwidth]{imgs/rff/entropy.png}
-  \caption{Linearized Kernel $K$}
+  \caption{Low-rank Parameterization}
   \end{subfigure}
-  \caption{\label{fig:example_production}Histogram of entropies of $P(B\ C\mid A)$. The average entropy is 2.26 for softmax kernel and 2.34 for linearized kernel. We use $|\mcN|=30$, $|\mcP|=60$, and $N=16$ for linearized kernel.}
+  \caption{\label{fig:example_production}Histogram of entropies of $P(B\ C\mid A)$. The average entropy is 2.26 for softmax and 2.34 for the low-rank parameterization. We use $|\mcN|=30$, $|\mcP|=60$, and $N=16$ for the rank.}
 \end{figure*}
 \section{PCFG Analysis}
 \begin{table}[!htp]
@@ -1391,21 +1516,22 @@ The HMM models have $\mcL=2^{11}$ states and the LHMM has rank $N=2^{9}$, a 4:1 
 $\mcN\times \mcN$ & $\mcN\times\mcP$  & $\mcP\times\mcN$ & $\mcP\times\mcP$ \\
 \midrule
   SM & SM & SM & SM & 243.19\\
-  $K$ & SM & SM & SM & 242.72\\
-  $K$ & $K$ & $K$ & SM &  259.05 \\
-  $K$ & $K$ & $K$ & $K$ & 278.60 \\
+  LR & SM & SM & SM & 242.72\\
+  LR & LR & LR & SM &  259.05 \\
+  LR & LR & LR & LR & 278.60 \\
 \bottomrule
 \end{tabular}
-\caption{\label{tbl:cky-ablation}Model perplexities evaluated on the validation set of \textsc{Ptb}. Here we use $|\mcN|=30$, $|\mcP|=60$, and $N=16$ features for linearized kernel. SM denotes the use of softmax kernels, while $K$ is an efficiently linearizable kernel.}
+\vspace{0.5em}
+\caption{\label{tbl:cky-ablation}Model perplexities evaluated on the validation set of \textsc{Ptb}. Here we use $|\mcN|=30$, $|\mcP|=60$, and $N=16$ rank. SM denotes the use of softmax, while LR a low-rank factorization.}
 \end{table}
 
 Figure~\ref{fig:example_production} shows the entropy distribution of the production rules $H(P(B\ C | A))$ for both using softmax kernel and the approximation. The average entropies of the two distributions are close. Besides, under this setting, $P(B\ C \in \mcN \times \mcN| A)$ are close for both kernels as well (softmax 0.20, linear 0.21), eliminating the possibility that the kernel model simply learns to avoid using $B\ C \in \mcN \times \mcN$ (such as by using a right-branching tree).
 
-In Table~\ref{tbl:cky-ablation}, we consider the effects of the mixed kernel parameterization, i.e. of replacing the softmax kernel with a linearizable kernel. In particular, we consider different combinations of preterminal / nonterminal tails $B\ C\in \mcN\times\mcN$, $B\ C\in \mcN\times\mcP$, $B\ C\in \mcP\times\mcN$, and $B\ C\in \mcP\times\mcP$ (our main model only factorizes nonterminal / nonterminal tails). Table~\ref{tbl:cky-ablation} shows that we get the best perplexity when we only use $K$ on $B\ C\in \mcN\times\mcN$, and use softmax kernel $K_\SM$ for the rest of the space. This fits with previous observations that when the label space $|\mcL|$ is large, a model with a very small rank constraint hurts performance.\footnote{In this particular ablation study, the size of $\mcN\times\mcN$ is only one-ninth of the total state space size $\{\mcN \cup \mcP\}\times \{\mcN \cup \mcP\}$.}
+In Table~\ref{tbl:cky-ablation}, we consider the effects of the mixed parameterization, i.e. of replacing the softmax parameterization with a low-rank parameterization. In particular, we consider different combinations of preterminal / nonterminal tails $B\ C\in \mcN\times\mcN$, $B\ C\in \mcN\times\mcP$, $B\ C\in \mcP\times\mcN$, and $B\ C\in \mcP\times\mcP$ (our main model only factorizes nonterminal / nonterminal tails). Table~\ref{tbl:cky-ablation} shows that we get the best perplexity when we only use $K$ on $B\ C\in \mcN\times\mcN$, and use softmax kernel $K_\SM$ for the rest of the space. This fits with previous observations that when the label space $|\mcL|$ is large, a model with a very small rank constraint hurts performance.\footnote{In this particular ablation study, the size of $\mcN\times\mcN$ is only one-ninth of the total state space size $\{\mcN \cup \mcP\}\times \{\mcN \cup \mcP\}$.}
 
 \section{\label{sec:frontier} Speed and Accuracy Frontier Analysis}
 We provide plots of the speed and accuracy over a range of model sizes for HMMs and PCFGs,
-in Figures~\ref{fig:hmm-frontier} and \ref{fig:pcfg-frontier} respectively.
+in Figure~\ref{fig:frontier} (left and right respectively).
 Speed is measured in seconds per batch, and accuracy by perplexity.
 Lower is better for both.
 
@@ -1430,6 +1556,26 @@ or simply by scaling further.
 
 \begin{figure}[H]
 \centering
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=4.5cm]{imgs/hmm/lhmm-speed-accuracy.png}
+\end{subfigure}
+\hspace{1em}
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=4.5cm]{imgs/hmm/pcfg-speed-accuracy.png}
+\end{subfigure}
+\caption{
+\label{fig:frontier}
+The speed, in seconds per batch, versus accuracy, in perplexity,
+for HMMs (left), PCFGs (right), and low-rank versions over a range of model sizes.
+As lower is better for both measures of speed and accuracy, the frontier is the bottom left.
+}
+\end{figure}
+
+\begin{comment}
+\begin{figure}[H]
+\centering
 \includegraphics[height=6cm]{imgs/hmm/hmm-pcfg-speed-accuracy.png}
 \caption{
 \label{fig:frontier}
@@ -1438,6 +1584,7 @@ for HMMs (left), PCFGs (right), and low-rank versions over a range of model size
 As lower is better for both measures of speed and accuracy, the frontier is the bottom left.
 }
 \end{figure}
+\end{comment}
 
 \begin{comment}
 \begin{figure}[H]
